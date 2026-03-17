@@ -22,18 +22,15 @@ body {
     background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
     margin:0;
 }
-
 .container {
     max-width:700px;
     margin:20px auto;
 }
-
 .card {
     background:#fff;
     padding:20px;
     border-radius:15px;
 }
-
 input,select,textarea {
     width:100%;
     padding:12px;
@@ -41,36 +38,31 @@ input,select,textarea {
     border-radius:10px;
     border:1px solid #ccc;
 }
-
 canvas {
     width:100%;
-    height:120px;
+    height:150px;
     border:2px dashed #ccc;
-    touch-action:none;
     border-radius:10px;
+    touch-action:none;
+    background:#fff;
 }
-
 button {
     width:100%;
     padding:14px;
-    margin-top:20px;
-    background:#007bff;
-    color:#fff;
+    margin-top:15px;
     border:none;
     border-radius:10px;
+    background:#007bff;
+    color:#fff;
 }
-
-.plan-box {
-    background:#f1f7ff;
-    padding:10px;
-    margin-top:10px;
-    border-radius:10px;
-}
-
 .clear-btn {
     background:#ccc;
     color:#000;
-    margin-top:5px;
+}
+.plan-box {
+    background:#f1f7ff;
+    padding:10px;
+    border-radius:10px;
 }
 </style>
 </head>
@@ -102,7 +94,7 @@ button {
 
 <input type="file" id="idfile" required>
 
-<h3>Signatures</h3>
+<h3>✍️ Signatures</h3>
 
 <canvas id="sig1"></canvas>
 <button type="button" class="clear-btn" onclick="clearCanvas(sig1)">Clear</button>
@@ -122,23 +114,19 @@ button {
 
 <script>
 
-// ✅ EMAILJS INIT
+// 🔑 EMAILJS
 emailjs.init("7axvwZ7yKtadp-BG9");
 
-// ✅ FIREBASE CONFIG (YOUR REAL CONFIG)
+// 🔥 FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyBwrJprjuU4BywFapZyw_SsBcsJAYo5OPU",
   authDomain: "convergecrm-7c237.firebaseapp.com",
-  projectId: "convergecrm-7c237",
-  storageBucket: "convergecrm-7c237.firebasestorage.app",
-  messagingSenderId: "1078658502451",
-  appId: "1:1078658502451:web:7d81a4d127d42f15eab846"
+  projectId: "convergecrm-7c237"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 📡 PLANS
 const plans = {
 
 // 📶 INTERNET ONLY (FiberX)
@@ -180,8 +168,7 @@ function loadPlans(){
 plan.innerHTML="";
 for(let p in plans[category.value]){
 let o=document.createElement("option");
-o.value=p;
-o.text=p;
+o.value=p;o.text=p;
 plan.appendChild(o);
 }
 }
@@ -190,10 +177,22 @@ function showDetails(){
 details.innerHTML = plans[category.value][plan.value] || "";
 }
 
-// ✍️ SIGNATURE (SMOOTH + NO SCROLL)
-function enableDraw(canvas){
-let ctx = canvas.getContext("2d");
+// ✍️ ADVANCED SIGNATURE PAD
+function initSignature(canvas){
+const ctx = canvas.getContext("2d");
 let drawing = false;
+let lastX = 0;
+let lastY = 0;
+
+// Fix scaling
+function resize(){
+const ratio = window.devicePixelRatio || 1;
+const rect = canvas.getBoundingClientRect();
+canvas.width = rect.width * ratio;
+canvas.height = rect.height * ratio;
+ctx.scale(ratio, ratio);
+}
+resize();
 
 function getPos(e){
 let rect = canvas.getBoundingClientRect();
@@ -207,8 +206,8 @@ function start(e){
 e.preventDefault();
 drawing = true;
 let pos = getPos(e);
-ctx.beginPath();
-ctx.moveTo(pos.x, pos.y);
+lastX = pos.x;
+lastY = pos.y;
 }
 
 function draw(e){
@@ -217,11 +216,18 @@ e.preventDefault();
 
 let pos = getPos(e);
 
-ctx.lineWidth = 2.5;
+// Smooth curve
+ctx.lineWidth = 2;
 ctx.lineCap = "round";
+ctx.lineJoin = "round";
 
+ctx.beginPath();
+ctx.moveTo(lastX, lastY);
 ctx.lineTo(pos.x, pos.y);
 ctx.stroke();
+
+lastX = pos.x;
+lastY = pos.y;
 }
 
 function end(){
@@ -237,13 +243,14 @@ canvas.addEventListener("touchmove", draw, {passive:false});
 canvas.addEventListener("touchend", end);
 }
 
-enableDraw(sig1);
-enableDraw(sig2);
-enableDraw(sig3);
+initSignature(sig1);
+initSignature(sig2);
+initSignature(sig3);
 
-// CLEAR SIGNATURE
+// CLEAR
 function clearCanvas(c){
-c.getContext("2d").clearRect(0,0,c.width,c.height);
+let ctx = c.getContext("2d");
+ctx.clearRect(0,0,c.width,c.height);
 }
 
 // 📄 PDF
@@ -253,27 +260,24 @@ let doc = new jsPDF();
 
 doc.text("Converge Application",20,20);
 doc.text(data.name,20,40);
-doc.text(data.phone,20,50);
 
 doc.addImage(data.sig1,"PNG",20,80,50,20);
 
 doc.save("application.pdf");
 }
 
-// 🚀 SUBMIT (FIXED)
+// 🚀 SUBMIT
 form.addEventListener("submit", function(e){
 e.preventDefault();
 
 if(!idfile.files.length){
-alert("Please upload ID");
+alert("Upload ID first");
 return;
 }
 
 let reader = new FileReader();
 
 reader.onload = async function(){
-
-try {
 
 let data = {
 name:name.value,
@@ -288,27 +292,16 @@ sig2:sig2.toDataURL(),
 sig3:sig3.toDataURL()
 };
 
-// 🔥 SAVE FIREBASE
 await db.collection("subs").add(data);
-
-// 🔥 SEND EMAIL (YOUR CONFIG)
 await emailjs.send("service_vqz7wno","template_ij15dml",data);
 
-// 🔥 GENERATE PDF
 generatePDF(data);
 
-alert("✅ Application Submitted!");
+alert("✅ Submitted!");
 form.reset();
-
-} catch(err){
-console.error(err);
-alert("❌ Submission failed");
-}
-
 };
 
 reader.readAsDataURL(idfile.files[0]);
-
 });
 
 </script>
