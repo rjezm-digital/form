@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Converge Application</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    margin: 0;
+    color: #333;
+}
+
+.container {
+    max-width: 700px;
+    margin: 20px auto;
+    padding: 15px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #0f2027;
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: gray;
+    margin-bottom: 20px;
+}
+
+.section {
+    margin-top: 20px;
+}
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #007bff;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0,123,255,0.3);
+}
+
+.plan-box {
+    background: #f1f7ff;
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+canvas {
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    width: 100%;
+    height: 120px;
+    background: #fafafa;
+}
+
+.upload-box {
+    border: 2px dashed #ccc;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 13px;
+    color: gray;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.footer-note {
+    font-size: 11px;
+    text-align: center;
+    color: gray;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<div class="card">
+
+<h2>📡 Converge Fiber Application</h2>
+<div class="subtitle">Fast • Reliable • Unlimited Internet</div>
+
+<form id="form">
+
+<div class="section">
+<div class="section-title">👤 Personal Information</div>
+
+<input id="name" placeholder="Full Name" required>
+<input id="phone" placeholder="Mobile Number" required>
+<textarea id="address" placeholder="Complete Address" required></textarea>
+</div>
+
+<div class="section">
+<div class="section-title">📦 Plan Selection</div>
+
+<select id="category" onchange="loadPlans()" required>
+<option value="">Select Category</option>
+<option value="fiber">FiberX (Internet Only)</option>
+<option value="bundle">Bundles (Internet + TV)</option>
+<option value="tod">Time of Day (TOD)</option>
+<option value="flexibiz">FlexiBiz</option>
+<option value="microbiz">MicroBiz</option>
+</select>
+
+<select id="plan" onchange="showDetails()" required></select>
+
+<div id="details" class="plan-box">
+</div>
+
+<div class="section">
+<div class="section-title">🪪 Valid ID</div>
+
+<div class="upload-box">
+Upload Valid Government ID
+<input type="file" id="idfile" accept="image/*" required>
+</div>
+
+<div class="section">
+<div class="section-title">✍️ Specimen Signatures</div>
+
+<label>Signature 1</label>
+<canvas id="sig1"></canvas>
+
+<label>Signature 2</label>
+<canvas id="sig2"></canvas>
+
+<label>Signature 3</label>
+<canvas id="sig3"></canvas>
+</div>
+
+<button type="submit">Submit Application</button>
+
+<div class="footer-note">
+By submitting, you agree to Converge terms & conditions.
+</div>
+
+</form>
+
+</div>
+</div>>
+
+<script>
+
+// 🔑 KEYS
+emailjs.init("7axvwZ7yKtadp-BG9");
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBwrJprjuU4BywFapZyw_SsBcsJAYo5OPU",
+  authDomain: "convergecrm-7c237.firebaseapp.com",
+  projectId: "convergecrm-7c237",
+  storageBucket: "convergecrm-7c237.firebasestorage.app",
+  messagingSenderId: "1078658502451",
+  appId: "1:1078658502451:web:7d81a4d127d42f15eab846"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+
+// 📡 PLANS
+const plans = {
+
+// 📶 INTERNET ONLY (FiberX)
+fiber: {
+"FiberX 1500": "₱1500 | up to 200 Mbps | No data cap | Free modem | 24-month lock-in",
+"FiberX 2000": "₱2000 | up to 300 Mbps | No data cap | Free modem | Streaming & gaming",
+"FiberX 2500": "₱2500 | up to 400 Mbps | No data cap | Work-from-home ready",
+"FiberX 3500": "₱3500 | up to 800 Mbps | No data cap | Heavy usage / power users"
+},
+
+// 📺 BUNDLES (Internet + Vision TV)
+bundle: {
+"FiberX 1500 + Vision": "₱1599 | 200 Mbps + TV channels | Entertainment bundle",
+"FiberX 2000 + Vision": "₱2099 | 300 Mbps + TV | Family plan",
+"FiberX 2500 + Vision": "₱2599 | 400 Mbps + Premium TV"
+},
+
+// 🌙 TIME OF DAY (TOD)
+tod: {
+"FiberX 1500 TOD": "₱1500 | ~100 Mbps (day) / up to 200 Mbps (night boost)",
+"FiberX 2000 TOD": "₱2000 | ~200 Mbps (day) / up to 400 Mbps (night boost)"
+},
+
+// 🏢 FLEXIBIZ (SME / Business)
+flexibiz: {
+"FlexiBiz 3000": "₱3000 | 300 Mbps | Business-grade | Static IP | SLA support",
+"FlexiBiz 5000": "₱5000 | 500 Mbps | Priority support | Higher reliability"
+},
+
+// 🏪 MICROBIZ (Small business)
+microbiz: {
+"MicroBiz 1500": "₱1500 | 100 Mbps | Entry-level business",
+"MicroBiz 2500": "₱2500 | 200 Mbps | Growing SMEs"
+}
+
+};
+
+function loadPlans(){
+plan.innerHTML="";
+for(let p in plans[category.value]){
+let o=document.createElement("option");
+o.value=p;o.text=p;
+plan.appendChild(o);
+}
+}
+
+function showDetails(){
+details.innerHTML = plans[category.value][plan.value] || "";
+}
+
+// ✍️ SIGNATURE
+function enableDraw(canvas){
+let ctx = canvas.getContext("2d");
+let drawing = false;
+
+function start(e){
+drawing = true;
+ctx.beginPath();
+}
+
+function end(){
+drawing = false;
+}
+
+function draw(e){
+if(!drawing) return;
+
+let rect = canvas.getBoundingClientRect();
+let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+let y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+
+ctx.lineWidth = 2;
+ctx.lineCap = "round";
+ctx.strokeStyle = "#000";
+
+ctx.lineTo(x,y);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(x,y);
+}
+
+// Mouse
+canvas.addEventListener("mousedown", start);
+canvas.addEventListener("mouseup", end);
+canvas.addEventListener("mousemove", draw);
+
+// Touch
+canvas.addEventListener("touchstart", start);
+canvas.addEventListener("touchend", end);
+canvas.addEventListener("touchmove", draw);
+}
+
+enableDraw(sig1);
+enableDraw(sig2);
+enableDraw(sig3);
+
+// 📄 PDF
+function generatePDF(data){
+const { jsPDF } = window.jspdf;
+let doc = new jsPDF();
+
+doc.text("Converge Application",20,20);
+doc.text(data.name,20,40);
+doc.text(data.phone,20,50);
+doc.text(data.address,20,60);
+
+doc.addImage(data.sig1,"PNG",20,80,50,20);
+doc.addImage(data.sig2,"PNG",20,110,50,20);
+doc.addImage(data.sig3,"PNG",20,140,50,20);
+
+doc.save("application.pdf");
+}
+
+// 📤 SUBMIT
+form.addEventListener("submit", function(e){
+e.preventDefault();
+
+let reader = new FileReader();
+
+reader.onload = async function(){
+
+let data = {
+name:name.value,
+phone:phone.value,
+address:address.value,
+category:category.value,
+plan:plan.value,
+details:details.innerText,
+id:reader.result,
+sig1:sig1.toDataURL(),
+sig2:sig2.toDataURL(),
+sig3:sig3.toDataURL()
+};
+
+await db.collection("subs").add(data);
+
+generatePDF(data);
+
+emailjs.send("service_vqz7wno","template_ij15dml",data);
+
+alert("✅ Done!");
+form.reset();
+
+};
+
+reader.readAsDataURL(idfile.files[0]);
+
+});
+
+</script>
+
+</body>
+</html>
