@@ -12,6 +12,7 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -255,6 +256,7 @@ authDomain:"convergecrm-7c237.firebaseapp.com",
 projectId:"convergecrm-7c237"
 });
 const db = firebase.firestore();
+const storage = firebase.storage();
 
 // PLANS
 const plans = {
@@ -438,7 +440,23 @@ console.log(e);
 }
 
 // PDF
-let pdfLink = await generatePDF(data);
+// GENERATE PDF
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+
+doc.text("Converge Application",20,20);
+doc.text(data.name,20,40);
+
+// convert to blob
+const pdfBlob = doc.output("blob");
+
+// upload to Firebase
+const fileRef = storage.ref("applications/" + Date.now() + ".pdf");
+
+await fileRef.put(pdfBlob);
+
+// get real URL
+const pdfLink = await fileRef.getDownloadURL();
 
 // EMAILJS
 try{
@@ -449,19 +467,18 @@ plan:data.plan,
 pdf_link: pdfLink
 });
 }catch(e){
-console.log(e);
+console.log("Email error:", e);
 }
 
 // SUCCESS
 loading.style.display="none";
 successScreen.style.display="block";
 
-};
+}; // close reader.onload
 
-// 🔥 IMPORTANT
 reader.readAsDataURL(idfile.files[0]);
 
-});
+}); // close form submit;
 
 </script>
 
