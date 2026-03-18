@@ -505,7 +505,7 @@ pdfLink = "Upload failed";
 }
 
 // EMAILJS
-trytry{
+try{
 let res = await emailjs.send("service_vqz7wno","template_ij15dml",{
 name:data.name,
 phone:data.phone,
@@ -535,6 +535,7 @@ successScreen.style.display="block";
 reader.readAsDataURL(idfile.files[0]);
 
 }); // close form submit
+
 </script>
 
 </body>
