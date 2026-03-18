@@ -18,27 +18,154 @@
 
 <style>
 *{box-sizing:border-box}
-body{font-family:'Poppins';background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);margin:0;}
-.container{max-width:720px;margin:30px auto;padding:15px;}
-.card{background:#fff;padding:25px;border-radius:20px;box-shadow:0 15px 40px rgba(0,0,0,0.2);}
-input,select,textarea{width:100%;padding:14px;margin-top:12px;border-radius:12px;border:1px solid #ddd;background:#f9fafc;}
-.plan-box{background:#eaf4ff;padding:12px;border-radius:12px;margin-top:10px;}
-.signature-box{border:2px dashed #ccc;border-radius:15px;padding:10px;margin-top:15px;}
-canvas{width:100%;height:150px;background:#fff;border-radius:10px;touch-action:none;}
-button{width:100%;padding:15px;margin-top:20px;border:none;border-radius:14px;background:#007bff;color:#fff;}
-.clear-btn{background:#e0e0e0;color:#333;margin-top:8px;}
 
-#loading{display:none;text-align:center;padding:30px;}
-#successScreen{display:none;text-align:center;padding:30px;}
+body{
+font-family:'Poppins';
+margin:0;
+background:linear-gradient(135deg,#0a1f33,#0d2b45,#124264);
+color:#fff;
+}
+
+/* HEADER */
+.header{
+text-align:center;
+padding:30px 15px 10px;
+}
+.header h1{
+margin:0;
+font-size:24px;
+font-weight:600;
+}
+.header p{
+margin:5px 0 0;
+font-size:13px;
+opacity:0.8;
+}
+
+/* CARD */
+.container{
+max-width:720px;
+margin:auto;
+padding:15px;
+}
+
+.card{
+background:#ffffff;
+color:#333;
+padding:25px;
+border-radius:18px;
+box-shadow:0 20px 50px rgba(0,0,0,0.3);
+}
+
+/* INPUTS */
+input,select,textarea{
+width:100%;
+padding:14px;
+margin-top:12px;
+border-radius:12px;
+border:1px solid #ddd;
+background:#f7f9fc;
+font-size:14px;
+}
+
+input:focus,select:focus,textarea:focus{
+outline:none;
+border-color:#007bff;
+box-shadow:0 0 0 3px rgba(0,123,255,0.15);
+background:#fff;
+}
+
+/* PLAN BOX */
+.plan-box{
+background:#eef6ff;
+padding:12px;
+border-radius:12px;
+margin-top:10px;
+border-left:4px solid #007bff;
+font-size:13px;
+}
+
+/* SIGNATURE */
+.signature-box{
+border:2px dashed #ccc;
+border-radius:12px;
+padding:10px;
+margin-top:15px;
+background:#fafafa;
+}
+
+canvas{
+width:100%;
+height:150px;
+background:#fff;
+border-radius:8px;
+touch-action:none;
+}
+
+/* BUTTON */
+button{
+width:100%;
+padding:15px;
+margin-top:20px;
+border:none;
+border-radius:12px;
+background:linear-gradient(135deg,#007bff,#0056b3);
+color:#fff;
+font-weight:600;
+font-size:15px;
+}
+
+button:hover{
+opacity:0.9;
+}
+
+.clear-btn{
+background:#e0e0e0;
+color:#333;
+margin-top:8px;
+}
+
+/* LOADING */
+#loading{
+display:none;
+text-align:center;
+padding:40px;
+color:#333;
+}
+
+.loader{
+border:6px solid #eee;
+border-top:6px solid #007bff;
+border-radius:50%;
+width:60px;
+height:60px;
+animation:spin 1s linear infinite;
+margin:auto;
+}
+
+@keyframes spin{
+to{transform:rotate(360deg)}
+}
+
+/* SUCCESS */
+#successScreen{
+display:none;
+text-align:center;
+padding:40px;
+color:#333;
+}
 </style>
 </head>
 
 <body>
 
+<div class="header">
+<h1>📡 Converge Application</h1>
+<p>Fast • Reliable • Unlimited Fiber Internet</p>
+</div>
+
 <div class="container">
 <div class="card">
-
-<h2>📡 Converge Application</h2>
 
 <form id="form">
 
@@ -48,9 +175,9 @@ button{width:100%;padding:15px;margin-top:20px;border:none;border-radius:14px;ba
 
 <select id="category" onchange="loadPlans()" required>
 <option value="">Select Category</option>
-<option value="super">🎮 Super Plans (TV Bundle)</option>
+<option value="super">🎮 Super Plans</option>
 <option value="netflix">🍿 Netflix Bundle</option>
-<option value="fiber">📶 FiberX (Internet Only)</option>
+<option value="fiber">📶 FiberX</option>
 <option value="tod">🌙 Time of Day</option>
 <option value="flexibiz">🏢 FlexiBiz</option>
 <option value="microbiz">🏪 MicroBiz</option>
@@ -58,13 +185,14 @@ button{width:100%;padding:15px;margin-top:20px;border:none;border-radius:14px;ba
 
 <select id="plan" onchange="showDetails()" required></select>
 <div id="details" class="plan-box"></div>
+
 <small style="color:gray;">
-* Speeds are up to maximum. Actual speeds may vary depending on location.
+* Speeds are up to maximum. Actual speeds may vary.
 </small>
 
 <input type="file" id="idfile" required>
 
-<h3>Signatures</h3>
+<h3>✍️ Signatures</h3>
 
 <div class="signature-box">
 <canvas id="sig1"></canvas>
@@ -81,19 +209,26 @@ button{width:100%;padding:15px;margin-top:20px;border:none;border-radius:14px;ba
 <button type="button" class="clear-btn" onclick="clearCanvas(sig3)">Clear</button>
 </div>
 
-<button type="submit">Submit</button>
+<button type="submit">Submit Application</button>
 
 </form>
 
-<div id="loading">Submitting...</div>
-<div id="successScreen">✅ Submitted</div>
+<div id="loading">
+<div class="loader"></div>
+<p>Submitting your application...</p>
+</div>
+
+<div id="successScreen">
+<h2>✅ Application Submitted</h2>
+<p>We will contact you shortly.</p>
+</div>
 
 </div>
 </div>
 
 <script>
 
-// ELEMENTS (FIXED)
+// ELEMENTS
 const form = document.getElementById("form");
 const loading = document.getElementById("loading");
 const successScreen = document.getElementById("successScreen");
@@ -121,7 +256,7 @@ projectId:"convergecrm-7c237"
 });
 const db = firebase.firestore();
 
-// PLANS
+// PLANS (UNCHANGED)
 const plans = {
 
 // 🎮 SUPER PLANS (Bundles with TV)
@@ -187,7 +322,7 @@ function showDetails(){
 details.innerHTML=plans[category.value][plan.value]||"";
 }
 
-// SIGNATURE FIX
+// SIGNATURE
 function initSignature(canvas){
 const ctx=canvas.getContext("2d");
 
@@ -252,6 +387,30 @@ function clearCanvas(c){
 c.getContext("2d").clearRect(0,0,c.width,c.height);
 }
 
+// 🔥 GENERATE PDF
+async function generatePDF(data){
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+
+doc.setFontSize(14);
+doc.text("Converge Application Form",20,20);
+
+doc.setFontSize(11);
+doc.text(`Name: ${data.name}`,20,40);
+doc.text(`Phone: ${data.phone}`,20,50);
+doc.text(`Address: ${data.address}`,20,60);
+doc.text(`Plan: ${data.plan}`,20,70);
+
+doc.addImage(data.sig1,"JPEG",20,90,60,30);
+doc.addImage(data.sig2,"JPEG",20,130,60,30);
+
+doc.addPage();
+doc.addImage(data.sig3,"JPEG",20,20,60,30);
+doc.addImage(data.id,"JPEG",20,70,100,60);
+
+return doc.output("datauristring");
+}
+
 // SUBMIT
 form.addEventListener("submit",function(e){
 e.preventDefault();
@@ -275,36 +434,27 @@ address:address.value,
 plan:plan.value,
 details:details.innerText,
 id:reader.result,
-sig1:sig1.toDataURL(),
-sig2:sig2.toDataURL(),
-sig3:sig3.toDataURL()
+sig1:sig1.toDataURL("image/jpeg",0.5),
+sig2:sig2.toDataURL("image/jpeg",0.5),
+sig3:sig3.toDataURL("image/jpeg",0.5)
 };
 
 // FIREBASE
 try{await db.collection("subs").add(data);}catch(e){console.log(e);}
 
-// EMAILJS WITH ATTACHMENT
+// PDF
+let pdfBase64 = await generatePDF(data);
+
+// EMAIL (PDF ATTACHMENT)
 try{
 await emailjs.send("service_vqz7wno","template_ij15dml",{
 name:data.name,
 phone:data.phone,
-address:data.address,
 plan:data.plan,
-details:data.details,
-sig1:data.sig1,
-sig2:data.sig2,
-sig3:data.sig3,
-id_image:data.id
+attachment: pdfBase64
 });
 }catch(e){console.log(e);}
 
-// PDF
-const {jsPDF}=window.jspdf;
-let doc=new jsPDF();
-doc.text(data.name,20,20);
-doc.save("application.pdf");
-
-// SUCCESS
 loading.style.display="none";
 successScreen.style.display="block";
 
