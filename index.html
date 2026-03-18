@@ -155,7 +155,18 @@ text-align:center;
 padding:40px;
 color:#333;
 }
+
+#map{
+margin-top:10px;
+border:1px solid #ddd;
+}
+
 </style>
+
+<script async defer 
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6Rivecu9PNbTEJSFHGMwCGhQPEgKwG3s&callback=initMap">
+</script>
+
 </head>
 
 <body>
@@ -173,6 +184,11 @@ color:#333;
 <input id="name" placeholder="Full Name" required>
 <input id="phone" placeholder="Mobile Number" required>
 <textarea id="address" placeholder="Address" required></textarea>
+<h3>📍 Pin Your Location</h3>
+<div id="map" style="width:100%;height:250px;border-radius:12px;"></div>
+
+<input id="lat" type="hidden">
+<input id="lng" type="hidden">
 
 <select id="category" onchange="loadPlans()" required>
 <option value="">Select Category</option>
@@ -228,6 +244,45 @@ color:#333;
 </div>
 
 <script>
+
+let map, marker;
+
+function initMap(){
+
+// default location (Philippines)
+const defaultLoc = { lat: 9.6, lng: 123.8 };
+
+map = new google.maps.Map(document.getElementById("map"), {
+center: defaultLoc,
+zoom: 13
+});
+
+// click to drop pin
+map.addListener("click", function(e){
+
+const position = {
+lat: e.latLng.lat(),
+lng: e.latLng.lng()
+};
+
+// remove old marker
+if(marker){
+marker.setMap(null);
+}
+
+// add new marker
+marker = new google.maps.Marker({
+position: position,
+map: map
+});
+
+// save values
+document.getElementById("lat").value = position.lat;
+document.getElementById("lng").value = position.lng;
+
+});
+
+}
 
 // ELEMENTS
 const form = document.getElementById("form");
@@ -448,6 +503,11 @@ alert("Upload ID");
 return;
 }
 
+if(!document.getElementById("lat").value){
+alert("Please pin your location on the map");
+return;
+}
+
 form.style.display="none";
 loading.style.display="block";
 
@@ -461,6 +521,10 @@ phone:phone.value,
 address:address.value,
 plan:plan.value,
 details:details.innerText,
+
+lat: document.getElementById("lat").value,
+lng: document.getElementById("lng").value,
+
 id: await compressImage(reader.result),
 sig1:getSignature(sig1),
 sig2:getSignature(sig2),
@@ -529,6 +593,7 @@ successScreen.style.display="block";
 reader.readAsDataURL(idfile.files[0]);
 
 }); // close form submit
+
 </script>
 
 </body>
