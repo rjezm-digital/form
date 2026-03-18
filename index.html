@@ -400,11 +400,9 @@ loading.style.display="block";
 
 let reader=new FileReader();
 
-reader.onload=async function(){
+reader.onload = async function(){
 
-try{
-
-let data={
+let data = {
 name:name.value,
 phone:phone.value,
 address:address.value,
@@ -415,6 +413,28 @@ id:reader.result,
 sig1:sig1.toDataURL(),
 sig2:sig2.toDataURL(),
 sig3:sig3.toDataURL()
+};
+
+// 🔥 FIREBASE (won't break app)
+try {
+await db.collection("subs").add(data);
+} catch(e){
+console.error("Firebase error:", e);
+}
+
+// 🔥 EMAILJS (won't break app)
+try {
+await emailjs.send("service_vqz7wno","template_ij15dml",data);
+} catch(e){
+console.error("Email error:", e);
+}
+
+// ✅ ALWAYS CONTINUE
+generatePDF(data);
+
+loading.style.display="none";
+successScreen.style.display="block";
+
 };
 
 await db.collection("subs").add(data);
