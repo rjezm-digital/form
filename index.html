@@ -445,23 +445,14 @@ try{await db.collection("subs").add(data);}catch(e){console.log(e);}
 // PDF
 let pdfBase64 = await generatePDF(data);
 
-// EMAIL (PDF ATTACHMENT)
-try{
+// convert to downloadable link
+let pdfLink = pdfBase64;
+
 await emailjs.send("service_vqz7wno","template_ij15dml",{
 name:data.name,
 phone:data.phone,
 plan:data.plan,
-attachment: pdfBase64
-});
-}catch(e){console.log(e);}
-
-loading.style.display="none";
-successScreen.style.display="block";
-
-};
-
-reader.readAsDataURL(idfile.files[0]);
-
+pdf_link: pdfLink
 });
 
 </script>
