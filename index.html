@@ -386,7 +386,7 @@ doc.text(data.name,20,40);
 doc.save("application.pdf");
 }
 
-// SUBMIT
+// // SUBMIT
 form.addEventListener("submit",function(e){
 e.preventDefault();
 
@@ -437,23 +437,8 @@ successScreen.style.display="block";
 
 };
 
-await db.collection("subs").add(data);
-await emailjs.send("service_vqz7wno","template_ij15dml",data);
-
-generatePDF(data);
-
-loading.style.display="none";
-successScreen.style.display="block";
-
-}catch(err){
-console.error(err);
-alert("Error submitting");
-location.reload();
-}
-
-};
-
 reader.readAsDataURL(idfile.files[0]);
+
 });
 </script>
 
