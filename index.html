@@ -408,7 +408,7 @@ canvas.height=img.height*(600/img.width);
 
 ctx.drawImage(img,0,0,canvas.width,canvas.height);
 
-resolve(canvas.toDataURL("image/jpeg",0.6));
+resolve(canvas.toDataURL("image/jpeg",0.4));
 };
 });
 }
@@ -438,7 +438,7 @@ ctx.fillRect(0,0,tempCanvas.width,tempCanvas.height);
 // draw original signature
 ctx.drawImage(canvas,0,0);
 
-return tempCanvas.toDataURL("image/jpeg",0.7);
+return tempCanvas.toDataURL("image/jpeg",0.4);
 }
 
 // ✅ FIXED SUBMIT
@@ -506,20 +506,23 @@ pdfLink = "Upload failed";
 
 // EMAILJS
 try{
-await emailjs.send("service_vqz7wno","template_ij15dml",{
+let res = await emailjs.send("service_vqz7wno","template_ij15dml",{
 name:data.name,
 phone:data.phone,
 address:data.address,
 plan:data.plan,
 details:data.details,
-
 sig1:data.sig1,
 sig2:data.sig2,
 sig3:data.sig3,
 id_image:data.id
 });
+
+console.log("EMAIL SENT SUCCESS:", res);
+
 }catch(e){
-console.log("Email error:", e);
+console.log("EMAIL ERROR:", e);
+alert("Email failed: " + JSON.stringify(e));
 }
 
 // SUCCESS
