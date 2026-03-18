@@ -393,6 +393,24 @@ function clearCanvas(c){
 c.getContext("2d").clearRect(0,0,c.width,c.height);
 }
 
+function compressImage(base64){
+return new Promise(resolve=>{
+let img=new Image();
+img.src=base64;
+img.onload=()=>{
+let canvas=document.createElement("canvas");
+let ctx=canvas.getContext("2d");
+
+canvas.width=600;
+canvas.height=img.height*(600/img.width);
+
+ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+resolve(canvas.toDataURL("image/jpeg",0.6));
+};
+});
+}
+
 // PDF
 async function generatePDF(data){
 const { jsPDF } = window.jspdf;
@@ -426,7 +444,7 @@ phone:phone.value,
 address:address.value,
 plan:plan.value,
 details:details.innerText,
-id:reader.result,
+id: await compressImage(reader.result),
 sig1:sig1.toDataURL("image/jpeg",0.5),
 sig2:sig2.toDataURL("image/jpeg",0.5),
 sig3:sig3.toDataURL("image/jpeg",0.5)
@@ -472,22 +490,15 @@ try{
 await emailjs.send("service_vqz7wno","template_ij15dml",{
 name:data.name,
 phone:data.phone,
+address:data.address,
 plan:data.plan,
-pdf_link: pdfLink
+details:data.details,
+
+sig1:data.sig1,
+sig2:data.sig2,
+sig3:data.sig3,
+id_image:data.id
 });
-}catch(e){
-console.log("Email error:", e);
-}
-
-// SUCCESS
-loading.style.display="none";
-successScreen.style.display="block";
-
-}; // close reader.onload
-
-reader.readAsDataURL(idfile.files[0]);
-
-}); // close form submit;
 
 </script>
 
