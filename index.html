@@ -505,7 +505,7 @@ pdfLink = "Upload failed";
 }
 
 // EMAILJS
-try{
+trytry{
 let res = await emailjs.send("service_vqz7wno","template_ij15dml",{
 name:data.name,
 phone:data.phone,
@@ -518,11 +518,12 @@ sig3:data.sig3,
 id_image:data.id
 });
 
-console.log("EMAIL SENT SUCCESS:", res);
+console.log("SUCCESS:", res);
+alert("Email sent!");
 
 }catch(e){
-console.log("EMAIL ERROR:", e);
-alert("Email failed: " + JSON.stringify(e));
+console.error("EMAIL ERROR:", e);
+alert("ERROR: " + JSON.stringify(e));
 }
 
 // SUCCESS
