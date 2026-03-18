@@ -256,7 +256,7 @@ projectId:"convergecrm-7c237"
 });
 const db = firebase.firestore();
 
-// PLANS (UNCHANGED)
+// PLANS
 const plans = {
 
 // 🎮 SUPER PLANS (Bundles with TV)
@@ -313,7 +313,8 @@ function loadPlans(){
 plan.innerHTML="";
 for(let p in plans[category.value]){
 let o=document.createElement("option");
-o.value=p;o.text=p;
+o.value=p;
+o.text=p;
 plan.appendChild(o);
 }
 }
@@ -322,7 +323,7 @@ function showDetails(){
 details.innerHTML=plans[category.value][plan.value]||"";
 }
 
-// SIGNATURE
+// ✅ FIXED SIGNATURE
 function initSignature(canvas){
 const ctx=canvas.getContext("2d");
 
@@ -339,44 +340,47 @@ resize();
 let drawing=false;
 
 function getPos(e){
-let rect=canvas.getBoundingClientRect();
+const rect=canvas.getBoundingClientRect();
 return{
 x:(e.touches?e.touches[0].clientX:e.clientX)-rect.left,
 y:(e.touches?e.touches[0].clientY:e.clientY)-rect.top
 };
 }
 
-canvas.addEventListener("mousedown",e=>{
+function start(e){
 drawing=true;
-let p=getPos(e);
+const p=getPos(e);
 ctx.beginPath();
 ctx.moveTo(p.x,p.y);
-});
+}
 
-canvas.addEventListener("mousemove",e=>{
-if(!drawing)return;
-let p=getPos(e);
+function draw(e){
+if(!drawing) return;
+const p=getPos(e);
+
+ctx.lineWidth=2;
+ctx.lineCap="round";
+
 ctx.lineTo(p.x,p.y);
 ctx.stroke();
-});
 
-canvas.addEventListener("mouseup",()=>drawing=false);
-
-canvas.addEventListener("touchstart",e=>{
-drawing=true;
-let p=getPos(e);
-ctx.beginPath();
+ctx.beginPath(); // 🔥 FIX (important)
 ctx.moveTo(p.x,p.y);
-},{passive:false});
+}
 
-canvas.addEventListener("touchmove",e=>{
-if(!drawing)return;
-let p=getPos(e);
-ctx.lineTo(p.x,p.y);
-ctx.stroke();
-},{passive:false});
+function end(){
+drawing=false;
+ctx.beginPath();
+}
 
-canvas.addEventListener("touchend",()=>drawing=false);
+canvas.addEventListener("mousedown",start);
+canvas.addEventListener("mousemove",draw);
+canvas.addEventListener("mouseup",end);
+canvas.addEventListener("mouseleave",end);
+
+canvas.addEventListener("touchstart",start,{passive:false});
+canvas.addEventListener("touchmove",draw,{passive:false});
+canvas.addEventListener("touchend",end);
 }
 
 initSignature(sig1);
@@ -387,31 +391,18 @@ function clearCanvas(c){
 c.getContext("2d").clearRect(0,0,c.width,c.height);
 }
 
-// 🔥 GENERATE PDF
+// PDF
 async function generatePDF(data){
 const { jsPDF } = window.jspdf;
 const doc = new jsPDF();
 
-doc.setFontSize(14);
-doc.text("Converge Application Form",20,20);
-
-doc.setFontSize(11);
-doc.text(`Name: ${data.name}`,20,40);
-doc.text(`Phone: ${data.phone}`,20,50);
-doc.text(`Address: ${data.address}`,20,60);
-doc.text(`Plan: ${data.plan}`,20,70);
-
-doc.addImage(data.sig1,"JPEG",20,90,60,30);
-doc.addImage(data.sig2,"JPEG",20,130,60,30);
-
-doc.addPage();
-doc.addImage(data.sig3,"JPEG",20,20,60,30);
-doc.addImage(data.id,"JPEG",20,70,100,60);
+doc.text("Converge Application",20,20);
+doc.text(data.name,20,40);
 
 return doc.output("datauristring");
 }
 
-// SUBMIT
+// ✅ FIXED SUBMIT
 form.addEventListener("submit",function(e){
 e.preventDefault();
 
@@ -440,19 +431,36 @@ sig3:sig3.toDataURL("image/jpeg",0.5)
 };
 
 // FIREBASE
-try{await db.collection("subs").add(data);}catch(e){console.log(e);}
+try{
+await db.collection("subs").add(data);
+}catch(e){
+console.log(e);
+}
 
 // PDF
-let pdfBase64 = await generatePDF(data);
+let pdfLink = await generatePDF(data);
 
-// convert to downloadable link
-let pdfLink = pdfBase64;
-
+// EMAILJS
+try{
 await emailjs.send("service_vqz7wno","template_ij15dml",{
 name:data.name,
 phone:data.phone,
 plan:data.plan,
 pdf_link: pdfLink
+});
+}catch(e){
+console.log(e);
+}
+
+// SUCCESS
+loading.style.display="none";
+successScreen.style.display="block";
+
+};
+
+// 🔥 IMPORTANT
+reader.readAsDataURL(idfile.files[0]);
+
 });
 
 </script>
