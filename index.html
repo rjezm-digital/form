@@ -422,6 +422,23 @@ doc.text(data.name,20,40);
 return doc.output("datauristring");
 }
 
+function getSignature(canvas){
+let tempCanvas = document.createElement("canvas");
+let ctx = tempCanvas.getContext("2d");
+
+tempCanvas.width = canvas.width;
+tempCanvas.height = canvas.height;
+
+// WHITE BACKGROUND
+ctx.fillStyle = "#fff";
+ctx.fillRect(0,0,tempCanvas.width,tempCanvas.height);
+
+// draw original signature
+ctx.drawImage(canvas,0,0);
+
+return tempCanvas.toDataURL("image/jpeg",0.7);
+}
+
 // ✅ FIXED SUBMIT
 form.addEventListener("submit",function(e){
 e.preventDefault();
@@ -445,9 +462,9 @@ address:address.value,
 plan:plan.value,
 details:details.innerText,
 id: await compressImage(reader.result),
-sig1:sig1.toDataURL("image/jpeg",0.5),
-sig2:sig2.toDataURL("image/jpeg",0.5),
-sig3:sig3.toDataURL("image/jpeg",0.5)
+sig1:getSignature(sig1),
+sig2:getSignature(sig2),
+sig3:getSignature(sig3)
 };
 
 // FIREBASE
