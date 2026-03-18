@@ -451,12 +451,21 @@ doc.text(data.name,20,40);
 const pdfBlob = doc.output("blob");
 
 // upload to Firebase
+let pdfLink = "";
+
+try {
 const fileRef = storage.ref("applications/" + Date.now() + ".pdf");
 
 await fileRef.put(pdfBlob);
 
-// get real URL
-const pdfLink = await fileRef.getDownloadURL();
+pdfLink = await fileRef.getDownloadURL();
+
+} catch(e) {
+console.log("Storage error:", e);
+
+// fallback so app won't freeze
+pdfLink = "Upload failed";
+}
 
 // EMAILJS
 try{
