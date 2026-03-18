@@ -499,7 +499,19 @@ sig2:data.sig2,
 sig3:data.sig3,
 id_image:data.id
 });
+}catch(e){
+console.log("Email error:", e);
+}
 
+// SUCCESS
+loading.style.display="none";
+successScreen.style.display="block";
+
+}; // close reader.onload
+
+reader.readAsDataURL(idfile.files[0]);
+
+}); // close form submit
 </script>
 
 </body>
