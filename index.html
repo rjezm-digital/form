@@ -17,52 +17,151 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    margin:0;
+*{box-sizing:border-box}
+
+body{
+font-family:'Poppins',sans-serif;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+margin:0;
 }
-.container {
-    max-width:700px;
-    margin:20px auto;
+
+.container{
+max-width:720px;
+margin:30px auto;
+padding:15px;
 }
-.card {
-    background:#fff;
-    padding:20px;
-    border-radius:15px;
+
+.card{
+background:#fff;
+padding:25px;
+border-radius:20px;
+box-shadow:0 15px 40px rgba(0,0,0,0.2);
 }
-input,select,textarea {
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    border-radius:10px;
-    border:1px solid #ccc;
+
+h2{text-align:center;margin-bottom:5px}
+.subtitle{text-align:center;font-size:13px;color:#777;margin-bottom:20px}
+
+input,select,textarea{
+width:100%;
+padding:14px;
+margin-top:12px;
+border-radius:12px;
+border:1px solid #ddd;
+background:#f9fafc;
 }
-canvas {
-    width:100%;
-    height:150px;
-    border:2px dashed #ccc;
-    border-radius:10px;
-    touch-action:none;
-    background:#fff;
+
+input:focus,select:focus,textarea:focus{
+border-color:#007bff;
+background:#fff;
+box-shadow:0 0 0 3px rgba(0,123,255,0.15);
+outline:none;
 }
-button {
-    width:100%;
-    padding:14px;
-    margin-top:15px;
-    border:none;
-    border-radius:10px;
-    background:#007bff;
-    color:#fff;
+
+.plan-box{
+background:#eaf4ff;
+padding:12px;
+border-radius:12px;
+margin-top:10px;
+border-left:4px solid #007bff;
 }
-.clear-btn {
-    background:#ccc;
-    color:#000;
+
+.signature-box{
+border:2px dashed #ccc;
+border-radius:15px;
+padding:10px;
+margin-top:15px;
 }
-.plan-box {
-    background:#f1f7ff;
-    padding:10px;
-    border-radius:10px;
+
+canvas{
+width:100%;
+height:150px;
+background:#fff;
+border-radius:10px;
+touch-action:none;
+}
+
+button{
+width:100%;
+padding:15px;
+margin-top:20px;
+border:none;
+border-radius:14px;
+background:linear-gradient(135deg,#007bff,#0056b3);
+color:#fff;
+font-weight:600;
+}
+
+.clear-btn{
+background:#e0e0e0;
+color:#333;
+margin-top:8px;
+}
+
+/* LOADING */
+#loading{
+display:none;
+text-align:center;
+padding:30px;
+}
+
+.loader{
+border:6px solid #eee;
+border-top:6px solid #007bff;
+border-radius:50%;
+width:60px;
+height:60px;
+animation:spin 1s linear infinite;
+margin:auto;
+}
+
+@keyframes spin{
+to{transform:rotate(360deg)}
+}
+
+/* SUCCESS */
+#successScreen{
+display:none;
+text-align:center;
+padding:30px;
+animation:fadeIn .5s ease;
+}
+
+.checkmark{
+width:80px;
+height:80px;
+border-radius:50%;
+border:4px solid #4CAF50;
+margin:auto;
+animation:pop .4s ease;
+position:relative;
+}
+
+.checkmark::after{
+content:'';
+position:absolute;
+left:22px;
+top:38px;
+width:20px;
+height:40px;
+border-right:4px solid #4CAF50;
+border-bottom:4px solid #4CAF50;
+transform:rotate(45deg);
+animation:draw .4s ease forwards;
+}
+
+@keyframes pop{
+from{transform:scale(0)}
+to{transform:scale(1)}
+}
+
+@keyframes draw{
+from{height:0;width:0}
+to{height:40px;width:20px}
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(20px)}
+to{opacity:1;transform:translateY(0)}
 }
 </style>
 </head>
@@ -73,6 +172,7 @@ button {
 <div class="card">
 
 <h2>📡 Converge Application</h2>
+<div class="subtitle">Fast • Reliable • Unlimited Internet</div>
 
 <form id="form">
 
@@ -82,46 +182,71 @@ button {
 
 <select id="category" onchange="loadPlans()" required>
 <option value="">Select Category</option>
-<option value="fiber">FiberX</option>
-<option value="bundle">Bundle</option>
-<option value="tod">TOD</option>
-<option value="flexibiz">FlexiBiz</option>
-<option value="microbiz">MicroBiz</option>
+<option value="super">🎮 Super Plans (TV Bundle)</option>
+<option value="netflix">🍿 Netflix Bundle</option>
+<option value="fiber">📶 FiberX (Internet Only)</option>
+<option value="tod">🌙 Time of Day</option>
+<option value="flexibiz">🏢 FlexiBiz</option>
+<option value="microbiz">🏪 MicroBiz</option>
 </select>
 
 <select id="plan" onchange="showDetails()" required></select>
 <div id="details" class="plan-box"></div>
 
+<small style="color:gray;">
+* Speeds are up to maximum. Actual speeds may vary depending on location.
+</small>
+
 <input type="file" id="idfile" required>
 
 <h3>✍️ Signatures</h3>
 
+<div class="signature-box">
 <canvas id="sig1"></canvas>
 <button type="button" class="clear-btn" onclick="clearCanvas(sig1)">Clear</button>
+</div>
 
+<div class="signature-box">
 <canvas id="sig2"></canvas>
 <button type="button" class="clear-btn" onclick="clearCanvas(sig2)">Clear</button>
+</div>
 
+<div class="signature-box">
 <canvas id="sig3"></canvas>
 <button type="button" class="clear-btn" onclick="clearCanvas(sig3)">Clear</button>
+</div>
 
 <button type="submit">Submit Application</button>
 
 </form>
+
+<!-- LOADING -->
+<div id="loading">
+<div class="loader"></div>
+<p>Submitting your application...</p>
+</div>
+
+<!-- SUCCESS -->
+<div id="successScreen">
+<div class="checkmark"></div>
+<h2>Application Submitted</h2>
+<p>Your Converge application has been received.</p>
+<button onclick="location.reload()">Submit Another</button>
+</div>
 
 </div>
 </div>
 
 <script>
 
-// 🔑 EMAILJS
+// EMAILJS
 emailjs.init("7axvwZ7yKtadp-BG9");
 
-// 🔥 FIREBASE
+// FIREBASE
 const firebaseConfig = {
-  apiKey: "AIzaSyBwrJprjuU4BywFapZyw_SsBcsJAYo5OPU",
-  authDomain: "convergecrm-7c237.firebaseapp.com",
-  projectId: "convergecrm-7c237"
+apiKey:"AIzaSyBwrJprjuU4BywFapZyw_SsBcsJAYo5OPU",
+authDomain:"convergecrm-7c237.firebaseapp.com",
+projectId:"convergecrm-7c237"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -129,37 +254,52 @@ const db = firebase.firestore();
 
 const plans = {
 
-// 📶 INTERNET ONLY (FiberX)
-fiber: {
-"FiberX 1500": "₱1500 | up to 200 Mbps | No data cap | Free modem | 24-month lock-in",
-"FiberX 2000": "₱2000 | up to 300 Mbps | No data cap | Free modem | Streaming & gaming",
-"FiberX 2500": "₱2500 | up to 400 Mbps | No data cap | Work-from-home ready",
-"FiberX 3500": "₱3500 | up to 800 Mbps | No data cap | Heavy usage / power users"
+// 🎮 SUPER PLANS (Bundles with TV)
+super: {
+"PLAY PLAN": "₱1,349 | up to 200 Mbps | Sky TV 99 (52 channels) | Xperience Box | WiFi 6 Modem",
+"MAX PLAN": "₱1,599 | up to 400 Mbps | Sky TV 99 | Xperience Box | WiFi 6 Modem",
+"ULTRA PLAN": "₱2,599 | up to 800 Mbps | Sky TV 99 | Xperience Box | WiFi 6 Modem"
 },
 
-// 📺 BUNDLES (Internet + Vision TV)
-bundle: {
-"FiberX 1500 + Vision": "₱1599 | 200 Mbps + TV channels | Entertainment bundle",
-"FiberX 2000 + Vision": "₱2099 | 300 Mbps + TV | Family plan",
-"FiberX 2500 + Vision": "₱2599 | 400 Mbps + Premium TV"
+// 🍿 NETFLIX BUNDLES
+netflix: {
+"PLAN 1558": "₱1,558 | 200 Mbps | FREE Netflix | WiFi 6 | SKY channels",
+"PLAN 1798": "₱1,798 | 325 Mbps | FREE Netflix | WiFi 6 | SKY channels",
+"PLAN 1998": "₱1,998 | 350 Mbps | FREE Netflix | WiFi 6 | SKY channels",
+"PLAN 2298": "₱2,298 | 500 Mbps | FREE Netflix | WiFi 6 | SKY channels"
+},
+
+// 📶 FIBER X (Internet Only)
+fiber: {
+"FiberX 1500": "₱1,500 | up to 300 Mbps | Unlimited | WiFi modem included",
+"FiberX 2000": "₱2,000 | up to 500 Mbps | Unlimited | WiFi modem included",
+"FiberX 2500": "₱2,500 | up to 700 Mbps | Unlimited | WiFi modem included",
+"FiberX 3500": "₱3,500 | up to 1 Gbps | XCLSV plan | Premium speed"
 },
 
 // 🌙 TIME OF DAY (TOD)
 tod: {
-"FiberX 1500 TOD": "₱1500 | ~100 Mbps (day) / up to 200 Mbps (night boost)",
-"FiberX 2000 TOD": "₱2000 | ~200 Mbps (day) / up to 400 Mbps (night boost)"
+"TOD 1699": "₱1,699 | up to 500 Mbps (peak) / 300 Mbps (off-peak)",
+"TOD 3000": "₱3,000 | up to 1000 Mbps (peak) / 700 Mbps (off-peak)"
 },
 
-// 🏢 FLEXIBIZ (SME / Business)
+// 🏢 FLEXIBIZ (from your photo)
 flexibiz: {
-"FlexiBiz 3000": "₱3000 | 300 Mbps | Business-grade | Static IP | SLA support",
-"FlexiBiz 5000": "₱5000 | 500 Mbps | Priority support | Higher reliability"
+"FlexiBiz 2000": "₱2,000 | up to 100 Mbps (peak) / 50 Mbps (off-peak)",
+"FlexiBiz 4000": "₱4,000 | up to 200 Mbps / 100 Mbps",
+"FlexiBiz 8000": "₱8,000 | up to 400 Mbps / 200 Mbps",
+"FlexiBiz 12000": "₱12,000 | up to 600 Mbps / 300 Mbps",
+"FlexiBiz 15000": "₱15,000 | up to 800 Mbps / 400 Mbps",
+"FlexiBiz 18000": "₱18,000 | up to 1000 Mbps / 500 Mbps"
 },
 
-// 🏪 MICROBIZ (Small business)
+// 🏪 MICROBIZ MAX (from your photo)
 microbiz: {
-"MicroBiz 1500": "₱1500 | 100 Mbps | Entry-level business",
-"MicroBiz 2500": "₱2500 | 200 Mbps | Growing SMEs"
+"MicroBiz Max 75": "₱1,449 | up to 75 Mbps",
+"MicroBiz Max 100": "₱1,599 | up to 100 Mbps",
+"MicroBiz Max 150": "₱1,799 | up to 150 Mbps",
+"MicroBiz Max 250": "₱2,099 | up to 250 Mbps",
+"MicroBiz Max 400": "₱2,499 | up to 400 Mbps"
 }
 
 };
@@ -174,112 +314,97 @@ plan.appendChild(o);
 }
 
 function showDetails(){
-details.innerHTML = plans[category.value][plan.value] || "";
+details.innerHTML=plans[category.value][plan.value]||"";
 }
 
-// ✍️ ADVANCED SIGNATURE PAD
+// SIGNATURE
 function initSignature(canvas){
-const ctx = canvas.getContext("2d");
-let drawing = false;
-let lastX = 0;
-let lastY = 0;
+const ctx=canvas.getContext("2d");
+let drawing=false;
 
-// Fix scaling
 function resize(){
-const ratio = window.devicePixelRatio || 1;
-const rect = canvas.getBoundingClientRect();
-canvas.width = rect.width * ratio;
-canvas.height = rect.height * ratio;
-ctx.scale(ratio, ratio);
+const ratio=window.devicePixelRatio||1;
+const rect=canvas.getBoundingClientRect();
+canvas.width=rect.width*ratio;
+canvas.height=rect.height*ratio;
+ctx.scale(ratio,ratio);
 }
 resize();
 
 function getPos(e){
-let rect = canvas.getBoundingClientRect();
-return {
-x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left,
-y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top
+let rect=canvas.getBoundingClientRect();
+return{
+x:(e.touches?e.touches[0].clientX:e.clientX)-rect.left,
+y:(e.touches?e.touches[0].clientY:e.clientY)-rect.top
 };
 }
 
 function start(e){
 e.preventDefault();
-drawing = true;
-let pos = getPos(e);
-lastX = pos.x;
-lastY = pos.y;
+drawing=true;
+let pos=getPos(e);
+ctx.beginPath();
+ctx.moveTo(pos.x,pos.y);
 }
 
 function draw(e){
-if(!drawing) return;
+if(!drawing)return;
 e.preventDefault();
-
-let pos = getPos(e);
-
-// Smooth curve
-ctx.lineWidth = 2;
-ctx.lineCap = "round";
-ctx.lineJoin = "round";
-
-ctx.beginPath();
-ctx.moveTo(lastX, lastY);
-ctx.lineTo(pos.x, pos.y);
+let pos=getPos(e);
+ctx.lineWidth=2;
+ctx.lineCap="round";
+ctx.lineJoin="round";
+ctx.lineTo(pos.x,pos.y);
 ctx.stroke();
-
-lastX = pos.x;
-lastY = pos.y;
 }
 
-function end(){
-drawing = false;
-}
+function end(){drawing=false;}
 
-canvas.addEventListener("mousedown", start);
-canvas.addEventListener("mousemove", draw);
-canvas.addEventListener("mouseup", end);
+canvas.addEventListener("mousedown",start);
+canvas.addEventListener("mousemove",draw);
+canvas.addEventListener("mouseup",end);
 
-canvas.addEventListener("touchstart", start, {passive:false});
-canvas.addEventListener("touchmove", draw, {passive:false});
-canvas.addEventListener("touchend", end);
+canvas.addEventListener("touchstart",start,{passive:false});
+canvas.addEventListener("touchmove",draw,{passive:false});
+canvas.addEventListener("touchend",end);
 }
 
 initSignature(sig1);
 initSignature(sig2);
 initSignature(sig3);
 
-// CLEAR
 function clearCanvas(c){
-let ctx = c.getContext("2d");
-ctx.clearRect(0,0,c.width,c.height);
+c.getContext("2d").clearRect(0,0,c.width,c.height);
 }
 
-// 📄 PDF
+// PDF
 function generatePDF(data){
-const { jsPDF } = window.jspdf;
-let doc = new jsPDF();
-
+const {jsPDF}=window.jspdf;
+let doc=new jsPDF();
 doc.text("Converge Application",20,20);
 doc.text(data.name,20,40);
-
-doc.addImage(data.sig1,"PNG",20,80,50,20);
-
 doc.save("application.pdf");
 }
 
-// 🚀 SUBMIT
-form.addEventListener("submit", function(e){
+// SUBMIT
+form.addEventListener("submit",function(e){
 e.preventDefault();
 
 if(!idfile.files.length){
-alert("Upload ID first");
+alert("Upload ID");
 return;
 }
 
-let reader = new FileReader();
+form.style.display="none";
+loading.style.display="block";
 
-reader.onload = async function(){
+let reader=new FileReader();
 
-let data = {
+reader.onload=async function(){
+
+try{
+
+let data={
 name:name.value,
 phone:phone.value,
 address:address.value,
@@ -297,13 +422,19 @@ await emailjs.send("service_vqz7wno","template_ij15dml",data);
 
 generatePDF(data);
 
-alert("✅ Submitted!");
-form.reset();
+loading.style.display="none";
+successScreen.style.display="block";
+
+}catch(err){
+console.error(err);
+alert("Error submitting");
+location.reload();
+}
+
 };
 
 reader.readAsDataURL(idfile.files[0]);
 });
-
 </script>
 
 </body>
