@@ -155,6 +155,29 @@ text-align:center;
 padding:40px;
 color:#333;
 }
+
+.upload-box{
+display:block;
+margin-top:15px;
+padding:16px;
+border-radius:12px;
+border:2px dashed #ccc;
+background:#f7f9fc;
+text-align:center;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+}
+
+.upload-box:hover{
+border-color:#007bff;
+background:#eef6ff;
+}
+
+.upload-box input{
+display:none;
+}
+
 </style>
 
 
@@ -193,7 +216,10 @@ color:#333;
 * Speeds are up to maximum. Actual speeds may vary.
 </small>
 
+<label class="upload-box">
+📤 Upload Valid ID
 <input type="file" id="idfile" required>
+</label>
 
 <h3>✍️ Signatures</h3>
 
