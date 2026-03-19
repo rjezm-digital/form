@@ -4,68 +4,55 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Converge Application</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <style>
-body{
-font-family:Poppins;
-margin:0;
-background:linear-gradient(135deg,#0a1f33,#124264);
-color:#fff;
-}
-
-.container{
-max-width:700px;
-margin:auto;
-padding:20px;
-}
-
-.card{
-background:#fff;
-color:#333;
-padding:20px;
-border-radius:15px;
-}
+body{font-family:Poppins;margin:0;background:#0d2b45;color:#fff;}
+.container{max-width:700px;margin:auto;padding:20px;}
+.card{background:#fff;color:#333;padding:20px;border-radius:15px;}
 
 input,select,textarea{
-width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:10px;
-border:1px solid #ddd;
+width:100%;padding:12px;margin-top:10px;border-radius:10px;border:1px solid #ddd;
 }
 
 button{
-width:100%;
-padding:14px;
-margin-top:20px;
-border:none;
-border-radius:10px;
-background:#007bff;
-color:#fff;
+width:100%;padding:14px;margin-top:20px;border:none;border-radius:10px;
+background:#007bff;color:#fff;font-weight:600;
 }
 
 /* Upload */
 .upload-box{
-display:block;
-padding:16px;
-border-radius:12px;
-border:2px dashed #ccc;
-background:#f7f9fc;
-text-align:center;
-font-weight:600;
-cursor:pointer;
-margin-top:10px;
+display:block;padding:16px;border-radius:12px;border:2px dashed #ccc;
+background:#f7f9fc;text-align:center;font-weight:600;cursor:pointer;margin-top:10px;
 }
 .upload-box input{display:none;}
+
+#preview{
+width:100%;
+margin-top:10px;
+border-radius:10px;
+display:none;
+}
+
+/* Progress */
+.progress{
+width:100%;
+height:8px;
+background:#eee;
+border-radius:10px;
+margin-top:10px;
+overflow:hidden;
+}
+.progress-bar{
+height:100%;
+width:0%;
+background:#28a745;
+}
 
 /* Signature */
 canvas{
@@ -73,23 +60,14 @@ width:100%;
 height:150px;
 background:#fff;
 border-radius:8px;
-margin-top:10px;
 touch-action:none;
 }
 
 .clear-btn{
-background:#ccc;
-color:#333;
-margin-top:10px;
+background:#ccc;color:#333;
 }
 
-/* Loading */
-#loading{
-display:none;
-text-align:center;
-padding:20px;
-color:#333;
-}
+#loading{text-align:center;margin-top:10px;display:none;}
 </style>
 </head>
 
@@ -126,7 +104,13 @@ color:#333;
 📤 Upload Valid ID
 <input type="file" id="idfile" accept="image/*" required>
 </label>
-<p id="fileName" style="font-size:12px;color:gray;"></p>
+
+<p id="fileName"></p>
+<img id="preview">
+
+<div class="progress">
+<div class="progress-bar" id="progressBar"></div>
+</div>
 
 <h4>Signature</h4>
 <canvas id="sig"></canvas>
@@ -136,7 +120,7 @@ color:#333;
 
 </form>
 
-<div id="loading">Submitting...</div>
+<div id="loading">Uploading... Please wait</div>
 
 </div>
 </div>
@@ -154,19 +138,6 @@ storageBucket:"convergecrm-7c237.appspot.com"
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-// FILE DISPLAY
-const idfile = document.getElementById("idfile");
-const uploadBox = document.getElementById("uploadBox");
-const fileName = document.getElementById("fileName");
-
-idfile.addEventListener("change", function(){
-if(this.files.length){
-fileName.innerText="Selected: "+this.files[0].name;
-uploadBox.style.borderColor="#28a745";
-}
-});
-
-// PLANS
 const plans = {
 
 // 🎮 SUPER PLANS (Bundles with TV)
@@ -217,7 +188,7 @@ microbiz: {
 "MicroBiz Max 400": "₱2,499 | up to 400 Mbps"
 }
 
-};
+}
 
 function loadPlans(){
 plan.innerHTML="";
@@ -229,7 +200,53 @@ plan.appendChild(o);
 }
 }
 
-// 🔥 PERFECT SIGNATURE FIX
+// ELEMENTS
+const form = document.getElementById("form");
+const idfile = document.getElementById("idfile");
+const preview = document.getElementById("preview");
+const progressBar = document.getElementById("progressBar");
+const loading = document.getElementById("loading");
+
+// PREVIEW
+idfile.addEventListener("change", function(){
+const file = this.files[0];
+
+if(file){
+preview.src = URL.createObjectURL(file);
+preview.style.display = "block";
+}
+});
+
+// COMPRESS IMAGE
+async function compressImage(file){
+return new Promise(resolve=>{
+const reader = new FileReader();
+
+reader.onload = e=>{
+const img = new Image();
+img.src = e.target.result;
+
+img.onload = ()=>{
+const canvas = document.createElement("canvas");
+const ctx = canvas.getContext("2d");
+
+const maxWidth = 800;
+const scale = maxWidth / img.width;
+
+canvas.width = maxWidth;
+canvas.height = img.height * scale;
+
+ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+resolve(canvas.toDataURL("image/jpeg", 0.6));
+};
+};
+
+reader.readAsDataURL(file);
+});
+}
+
+// SIGNATURE
 const canvas = document.getElementById("sig");
 const ctx = canvas.getContext("2d");
 
@@ -240,74 +257,74 @@ const ratio = window.devicePixelRatio || 1;
 canvas.width = rect.width * ratio;
 canvas.height = rect.height * ratio;
 
-ctx.setTransform(1,0,0,1,0,0);
 ctx.scale(ratio, ratio);
 }
-
 resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
 
-ctx.lineWidth = 2;
-ctx.lineCap = "round";
-
-let drawing = false;
+let drawing=false;
 
 function getPos(e){
 const rect = canvas.getBoundingClientRect();
-return {
+return{
 x:(e.touches?e.touches[0].clientX:e.clientX)-rect.left,
 y:(e.touches?e.touches[0].clientY:e.clientY)-rect.top
 };
 }
 
-function start(e){
-e.preventDefault();
+canvas.addEventListener("mousedown",e=>{
 drawing=true;
 const p=getPos(e);
 ctx.beginPath();
 ctx.moveTo(p.x,p.y);
-}
+});
 
-function draw(e){
-if(!drawing) return;
-e.preventDefault();
-
+canvas.addEventListener("mousemove",e=>{
+if(!drawing)return;
 const p=getPos(e);
-
 ctx.lineTo(p.x,p.y);
 ctx.stroke();
+});
 
+canvas.addEventListener("mouseup",()=>drawing=false);
+
+canvas.addEventListener("touchstart",e=>{
+drawing=true;
+const p=getPos(e);
 ctx.beginPath();
 ctx.moveTo(p.x,p.y);
-}
+},{passive:false});
 
-function stop(){
-drawing=false;
-ctx.beginPath();
-}
+canvas.addEventListener("touchmove",e=>{
+if(!drawing)return;
+e.preventDefault();
+const p=getPos(e);
+ctx.lineTo(p.x,p.y);
+ctx.stroke();
+},{passive:false});
 
-canvas.addEventListener("mousedown",start);
-canvas.addEventListener("mousemove",draw);
-canvas.addEventListener("mouseup",stop);
-canvas.addEventListener("mouseleave",stop);
-
-canvas.addEventListener("touchstart",start,{passive:false});
-canvas.addEventListener("touchmove",draw,{passive:false});
-canvas.addEventListener("touchend",stop);
+canvas.addEventListener("touchend",()=>drawing=false);
 
 function clearSignature(){
 ctx.clearRect(0,0,canvas.width,canvas.height);
 }
 
+// SIGNATURE IMAGE
 function getSignatureImage(){
-    return canvas.toDataURL("image/png");
+const tempCanvas = document.createElement("canvas");
+const tctx = tempCanvas.getContext("2d");
+
+tempCanvas.width = 400;
+tempCanvas.height = 150;
+
+tctx.fillStyle="#fff";
+tctx.fillRect(0,0,tempCanvas.width,tempCanvas.height);
+tctx.drawImage(canvas,0,0,tempCanvas.width,tempCanvas.height);
+
+return tempCanvas.toDataURL("image/jpeg",0.5);
 }
 
 // SUBMIT
-const form = document.getElementById("form");
-const loading = document.getElementById("loading");
-
-form.addEventListener("submit",async(e)=>{
+form.addEventListener("submit", async (e)=>{
 e.preventDefault();
 
 if(!idfile.files.length){
@@ -317,55 +334,54 @@ return;
 
 loading.style.display="block";
 
-// upload ID
-const file=idfile.files[0];
-const ref=storage.ref("ids/"+Date.now()+"_"+file.name);
-await ref.put(file);
-const idURL=await ref.getDownloadURL();
+try{
 
-// PDF
-const { jsPDF } = window.jspdf;
-const doc = new jsPDF();
-doc.text(document.getElementById("name").value,20,20);
+// COMPRESS
+const compressed = await compressImage(idfile.files[0]);
 
-const pdfBlob=doc.output("blob");
-const pdfRef=storage.ref("pdfs/"+Date.now()+".pdf");
+// UPLOAD WITH PROGRESS
+const ref = storage.ref("ids/"+Date.now()+".jpg");
+const uploadTask = ref.putString(compressed,'data_url');
 
-await pdfRef.put(pdfBlob);
-const pdfURL=await pdfRef.getDownloadURL();
+uploadTask.on('state_changed', snapshot=>{
+const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+progressBar.style.width = progress + "%";
+});
 
-// AFTER uploading ID
-// BEFORE saving to Firestore
+await uploadTask;
+const idURL = await ref.getDownloadURL();
 
-// SIGNATURE UPLOAD
+// SIGNATURE
 const sigData = getSignatureImage();
-
-const sigRef = storage.ref("signatures/" + Date.now() + ".png");
-await sigRef.putString(sigData, 'data_url');
-
+const sigRef = storage.ref("signatures/"+Date.now()+".jpg");
+await sigRef.putString(sigData,'data_url');
 const sigURL = await sigRef.getDownloadURL();
 
-// SAVE FIRESTORE
+// SAVE
 await db.collection("applications").add({
-    name: name.value,
-    phone: phone.value,
-    address: address.value,
-    plan: plan.value,
-    status: "Pending",
-    date: new Date(),
-
-    idURL: idURL,
-    pdfURL: pdfURL,
-    signatureURL: sigURL   // 🔥 NEW
+name:name.value,
+phone:phone.value,
+address:address.value,
+plan:plan.value,
+status:"Pending",
+date:new Date(),
+idURL,
+sigURL
 });
 
 loading.style.display="none";
-alert("Application submitted!");
+alert("Application Submitted!");
 
 form.reset();
-fileName.innerText="";
-uploadBox.style.borderColor="#ccc";
+preview.style.display="none";
+progressBar.style.width="0%";
 clearSignature();
+
+}catch(err){
+console.error(err);
+loading.style.display="none";
+alert("Upload failed. Try again.");
+}
 
 });
 
