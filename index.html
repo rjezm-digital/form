@@ -343,7 +343,7 @@ const compressed = await compressImage(idfile.files[0]);
 
 // UPLOAD WITH PROGRESS
 const ref = storage.ref("ids/"+Date.now()+".jpg");
-const uploadTask = ref.putString(compressed,'data_url');
+const uploadTask = const uploadTask = ref.put(compressed); // 🔥 FIX
 
 uploadTask.on('state_changed', snapshot=>{
 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
