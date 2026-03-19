@@ -6,9 +6,6 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
-<!-- EmailJS -->
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -18,147 +15,47 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-*{box-sizing:border-box}
-
 body{
-font-family:'Poppins';
+font-family:Poppins;
 margin:0;
-background:linear-gradient(135deg,#0a1f33,#0d2b45,#124264);
+background:linear-gradient(135deg,#0a1f33,#124264);
 color:#fff;
 }
 
-/* HEADER */
-.header{
-text-align:center;
-padding:30px 15px 10px;
-}
-.header h1{
-margin:0;
-font-size:24px;
-font-weight:600;
-}
-.header p{
-margin:5px 0 0;
-font-size:13px;
-opacity:0.8;
-}
-
-/* CARD */
 .container{
-max-width:720px;
+max-width:700px;
 margin:auto;
-padding:15px;
+padding:20px;
 }
 
 .card{
-background:#ffffff;
+background:#fff;
 color:#333;
-padding:25px;
-border-radius:18px;
-box-shadow:0 20px 50px rgba(0,0,0,0.3);
+padding:20px;
+border-radius:15px;
 }
 
-/* INPUTS */
 input,select,textarea{
 width:100%;
-padding:14px;
-margin-top:12px;
-border-radius:12px;
-border:1px solid #ddd;
-background:#f7f9fc;
-font-size:14px;
-}
-
-input:focus,select:focus,textarea:focus{
-outline:none;
-border-color:#007bff;
-box-shadow:0 0 0 3px rgba(0,123,255,0.15);
-background:#fff;
-}
-
-/* PLAN BOX */
-.plan-box{
-background:#eef6ff;
 padding:12px;
-border-radius:12px;
 margin-top:10px;
-border-left:4px solid #007bff;
-font-size:13px;
+border-radius:10px;
+border:1px solid #ddd;
 }
 
-/* SIGNATURE */
-.signature-box{
-border:2px dashed #ccc;
-border-radius:12px;
-padding:10px;
-margin-top:15px;
-background:#fafafa;
-}
-
-canvas{
-width:100%;
-height:150px;
-background:#fff;
-border-radius:8px;
-touch-action:none;
-}
-
-/* BUTTON */
 button{
 width:100%;
-padding:15px;
+padding:14px;
 margin-top:20px;
 border:none;
-border-radius:12px;
-background:linear-gradient(135deg,#007bff,#0056b3);
+border-radius:10px;
+background:#007bff;
 color:#fff;
-font-weight:600;
-font-size:15px;
 }
 
-button:hover{
-opacity:0.9;
-}
-
-.clear-btn{
-background:#e0e0e0;
-color:#333;
-margin-top:8px;
-}
-
-/* LOADING */
-#loading{
-display:none;
-text-align:center;
-padding:40px;
-color:#333;
-}
-
-.loader{
-border:6px solid #eee;
-border-top:6px solid #007bff;
-border-radius:50%;
-width:60px;
-height:60px;
-animation:spin 1s linear infinite;
-margin:auto;
-}
-
-@keyframes spin{
-to{transform:rotate(360deg)}
-}
-
-/* SUCCESS */
-#successScreen{
-display:none;
-text-align:center;
-padding:40px;
-color:#333;
-}
-
+/* Upload */
 .upload-box{
 display:block;
-margin-top:15px;
 padding:16px;
 border-radius:12px;
 border:2px dashed #ccc;
@@ -166,32 +63,42 @@ background:#f7f9fc;
 text-align:center;
 font-weight:600;
 cursor:pointer;
-transition:0.3s;
+margin-top:10px;
+}
+.upload-box input{display:none;}
+
+/* Signature */
+canvas{
+width:100%;
+height:150px;
+background:#fff;
+border-radius:8px;
+margin-top:10px;
+touch-action:none;
 }
 
-.upload-box:hover{
-border-color:#007bff;
-background:#eef6ff;
+.clear-btn{
+background:#ccc;
+color:#333;
+margin-top:10px;
 }
 
-.upload-box input{
+/* Loading */
+#loading{
 display:none;
+text-align:center;
+padding:20px;
+color:#333;
 }
-
 </style>
-
-
 </head>
 
 <body>
 
-<div class="header">
-<h1>📡 Converge Application</h1>
-<p>Fast • Reliable • Unlimited Fiber Internet</p>
-</div>
-
 <div class="container">
 <div class="card">
+
+<h2>📡 Converge Application</h2>
 
 <form id="form">
 
@@ -201,90 +108,63 @@ display:none;
 
 <select id="category" onchange="loadPlans()" required>
 <option value="">Select Category</option>
-<option value="super">🎮 Super Plans</option>
+<option value="super">🎮 Super Plans (TV Bundle)</option>
 <option value="netflix">🍿 Netflix Bundle</option>
-<option value="fiber">📶 FiberX</option>
+<option value="fiber">📶 FiberX (Internet Only)</option>
 <option value="tod">🌙 Time of Day</option>
 <option value="flexibiz">🏢 FlexiBiz</option>
 <option value="microbiz">🏪 MicroBiz</option>
 </select>
 
-<select id="plan" onchange="showDetails()" required></select>
-<div id="details" class="plan-box"></div>
-
+<select id="plan" required></select>
 <small style="color:gray;">
-* Speeds are up to maximum. Actual speeds may vary.
+* Speeds are up to maximum. Actual speeds may vary depending on location.
 </small>
 
-<label class="upload-box">
+<!-- Upload -->
+<label class="upload-box" id="uploadBox">
 📤 Upload Valid ID
-<input type="file" id="idfile" required>
+<input type="file" id="idfile" accept="image/*" required>
 </label>
+<p id="fileName" style="font-size:12px;color:gray;"></p>
 
-<h3>✍️ Signatures</h3>
-
-<div class="signature-box">
-<canvas id="sig1"></canvas>
-<button type="button" class="clear-btn" onclick="clearCanvas(sig1)">Clear</button>
-</div>
-
-<div class="signature-box">
-<canvas id="sig2"></canvas>
-<button type="button" class="clear-btn" onclick="clearCanvas(sig2)">Clear</button>
-</div>
-
-<div class="signature-box">
-<canvas id="sig3"></canvas>
-<button type="button" class="clear-btn" onclick="clearCanvas(sig3)">Clear</button>
-</div>
+<h4>Signature</h4>
+<canvas id="sig"></canvas>
+<button type="button" class="clear-btn" onclick="clearSignature()">Clear Signature</button>
 
 <button type="submit">Submit Application</button>
 
 </form>
 
-<div id="loading">
-<div class="loader"></div>
-<p>Submitting your application...</p>
-</div>
-
-<div id="successScreen">
-<h2>✅ Application Submitted</h2>
-<p>We will contact you shortly.</p>
-</div>
+<div id="loading">Submitting...</div>
 
 </div>
 </div>
 
 <script>
 
-// ELEMENTS
-const form = document.getElementById("form");
-const loading = document.getElementById("loading");
-const successScreen = document.getElementById("successScreen");
-
-const name = document.getElementById("name");
-const phone = document.getElementById("phone");
-const address = document.getElementById("address");
-const category = document.getElementById("category");
-const plan = document.getElementById("plan");
-const details = document.getElementById("details");
-const idfile = document.getElementById("idfile");
-
-const sig1 = document.getElementById("sig1");
-const sig2 = document.getElementById("sig2");
-const sig3 = document.getElementById("sig3");
-
-// EMAILJS
-emailjs.init("7axvwZ7yKtadp-BG9");
-
 // FIREBASE
 firebase.initializeApp({
 apiKey:"AIzaSyBwrJprjuU4BywFapZyw_SsBcsJAYo5OPU",
 authDomain:"convergecrm-7c237.firebaseapp.com",
-projectId:"convergecrm-7c237"
+projectId:"convergecrm-7c237",
+storageBucket:"convergecrm-7c237.appspot.com"
 });
+
 const db = firebase.firestore();
 const storage = firebase.storage();
+
+// FILE DISPLAY
+const idfile = document.getElementById("idfile");
+const uploadBox = document.getElementById("uploadBox");
+const fileName = document.getElementById("fileName");
+
+idfile.addEventListener("change", function(){
+if(this.files.length){
+fileName.innerText="Selected: "+this.files[0].name;
+uploadBox.style.borderColor="#28a745";
+}
+});
 
 // PLANS
 const plans = {
@@ -349,35 +229,39 @@ plan.appendChild(o);
 }
 }
 
-function showDetails(){
-details.innerHTML=plans[category.value][plan.value]||"";
-}
+// 🔥 PERFECT SIGNATURE FIX
+const canvas = document.getElementById("sig");
+const ctx = canvas.getContext("2d");
 
-// ✅ FIXED SIGNATURE
-function initSignature(canvas){
-const ctx=canvas.getContext("2d");
+function resizeCanvas(){
+const rect = canvas.getBoundingClientRect();
+const ratio = window.devicePixelRatio || 1;
 
-function resize(){
-const rect=canvas.getBoundingClientRect();
-const ratio=window.devicePixelRatio||1;
-canvas.width=rect.width*ratio;
-canvas.height=rect.height*ratio;
+canvas.width = rect.width * ratio;
+canvas.height = rect.height * ratio;
+
 ctx.setTransform(1,0,0,1,0,0);
-ctx.scale(ratio,ratio);
+ctx.scale(ratio, ratio);
 }
-resize();
 
-let drawing=false;
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+ctx.lineWidth = 2;
+ctx.lineCap = "round";
+
+let drawing = false;
 
 function getPos(e){
-const rect=canvas.getBoundingClientRect();
-return{
+const rect = canvas.getBoundingClientRect();
+return {
 x:(e.touches?e.touches[0].clientX:e.clientX)-rect.left,
 y:(e.touches?e.touches[0].clientY:e.clientY)-rect.top
 };
 }
 
 function start(e){
+e.preventDefault();
 drawing=true;
 const p=getPos(e);
 ctx.beginPath();
@@ -386,181 +270,104 @@ ctx.moveTo(p.x,p.y);
 
 function draw(e){
 if(!drawing) return;
-const p=getPos(e);
+e.preventDefault();
 
-ctx.lineWidth=2;
-ctx.lineCap="round";
+const p=getPos(e);
 
 ctx.lineTo(p.x,p.y);
 ctx.stroke();
 
-ctx.beginPath(); // 🔥 FIX (important)
+ctx.beginPath();
 ctx.moveTo(p.x,p.y);
 }
 
-function end(){
+function stop(){
 drawing=false;
 ctx.beginPath();
 }
 
 canvas.addEventListener("mousedown",start);
 canvas.addEventListener("mousemove",draw);
-canvas.addEventListener("mouseup",end);
-canvas.addEventListener("mouseleave",end);
+canvas.addEventListener("mouseup",stop);
+canvas.addEventListener("mouseleave",stop);
 
 canvas.addEventListener("touchstart",start,{passive:false});
 canvas.addEventListener("touchmove",draw,{passive:false});
-canvas.addEventListener("touchend",end);
+canvas.addEventListener("touchend",stop);
+
+function clearSignature(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
 }
 
-initSignature(sig1);
-initSignature(sig2);
-initSignature(sig3);
-
-function clearCanvas(c){
-c.getContext("2d").clearRect(0,0,c.width,c.height);
+function getSignatureImage(){
+    return canvas.toDataURL("image/png");
 }
 
-function compressImage(base64){
-return new Promise(resolve=>{
-let img=new Image();
-img.src=base64;
-img.onload=()=>{
-let canvas=document.createElement("canvas");
-let ctx=canvas.getContext("2d");
+// SUBMIT
+const form = document.getElementById("form");
+const loading = document.getElementById("loading");
 
-canvas.width=600;
-canvas.height=img.height*(600/img.width);
-
-ctx.drawImage(img,0,0,canvas.width,canvas.height);
-
-resolve(canvas.toDataURL("image/jpeg",0.4));
-};
-});
-}
-
-// PDF
-async function generatePDF(data){
-const { jsPDF } = window.jspdf;
-const doc = new jsPDF();
-
-doc.text("Converge Application",20,20);
-doc.text(data.name,20,40);
-
-return doc.output("datauristring");
-}
-
-function getSignature(canvas){
-let tempCanvas = document.createElement("canvas");
-let ctx = tempCanvas.getContext("2d");
-
-tempCanvas.width = canvas.width;
-tempCanvas.height = canvas.height;
-
-// WHITE BACKGROUND
-ctx.fillStyle = "#fff";
-ctx.fillRect(0,0,tempCanvas.width,tempCanvas.height);
-
-// draw original signature
-ctx.drawImage(canvas,0,0);
-
-return tempCanvas.toDataURL("image/jpeg",0.4);
-}
-
-// ✅ FIXED SUBMIT
-form.addEventListener("submit",function(e){
+form.addEventListener("submit",async(e)=>{
 e.preventDefault();
 
 if(!idfile.files.length){
-alert("Upload ID");
+alert("Upload ID first!");
 return;
 }
 
-form.style.display="none";
 loading.style.display="block";
 
-let reader=new FileReader();
-
-reader.onload = async function(){
-
-let data={
-name:name.value,
-phone:phone.value,
-address:address.value,
-plan:plan.value,
-details:details.innerText,
-id: await compressImage(reader.result),
-sig1:getSignature(sig1),
-sig2:getSignature(sig2),
-sig3:getSignature(sig3)
-};
-
-// FIREBASE
-try{
-await db.collection("subs").add(data);
-}catch(e){
-console.log(e);
-}
+// upload ID
+const file=idfile.files[0];
+const ref=storage.ref("ids/"+Date.now()+"_"+file.name);
+await ref.put(file);
+const idURL=await ref.getDownloadURL();
 
 // PDF
-// GENERATE PDF
 const { jsPDF } = window.jspdf;
 const doc = new jsPDF();
+doc.text(document.getElementById("name").value,20,20);
 
-doc.text("Converge Application",20,20);
-doc.text(data.name,20,40);
+const pdfBlob=doc.output("blob");
+const pdfRef=storage.ref("pdfs/"+Date.now()+".pdf");
 
-// convert to blob
-const pdfBlob = doc.output("blob");
+await pdfRef.put(pdfBlob);
+const pdfURL=await pdfRef.getDownloadURL();
 
-// upload to Firebase
-let pdfLink = "";
+// AFTER uploading ID
+// BEFORE saving to Firestore
 
-try {
-const fileRef = storage.ref("applications/" + Date.now() + ".pdf");
+// SIGNATURE UPLOAD
+const sigData = getSignatureImage();
 
-await fileRef.put(pdfBlob);
+const sigRef = storage.ref("signatures/" + Date.now() + ".png");
+await sigRef.putString(sigData, 'data_url');
 
-pdfLink = await fileRef.getDownloadURL();
+const sigURL = await sigRef.getDownloadURL();
 
-} catch(e) {
-console.log("Storage error:", e);
+// SAVE FIRESTORE
+await db.collection("applications").add({
+    name: name.value,
+    phone: phone.value,
+    address: address.value,
+    plan: plan.value,
+    status: "Pending",
+    date: new Date(),
 
-// fallback so app won't freeze
-pdfLink = "Upload failed";
-}
-
-// EMAILJS
-try{
-let res = await emailjs.send("service_vqz7wno","template_ij15dml",{
-name:data.name,
-phone:data.phone,
-address:data.address,
-plan:data.plan,
-details:data.details,
-sig1:data.sig1,
-sig2:data.sig2,
-sig3:data.sig3,
-id_image:data.id
+    idURL: idURL,
+    pdfURL: pdfURL,
+    signatureURL: sigURL   // 🔥 NEW
 });
 
-console.log("SUCCESS:", res);
-alert("Email sent!");
-
-}catch(e){
-console.error("EMAIL ERROR:", e);
-alert("ERROR: " + JSON.stringify(e));
-}
-
-// SUCCESS
 loading.style.display="none";
-successScreen.style.display="block";
+alert("Application submitted!");
 
-}; // close reader.onload
+form.reset();
+fileName.innerText="";
+uploadBox.style.borderColor="#ccc";
+clearSignature();
 
-reader.readAsDataURL(idfile.files[0]);
-
-}); // close form submit
+});
 
 </script>
 
