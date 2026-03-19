@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Converge Application</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+font-family:Poppins;
+margin:0;
+background:linear-gradient(135deg,#0a1f33,#124264);
+color:#fff;
+}
+
+.container{
+max-width:700px;
+margin:auto;
+padding:20px;
+}
+
+.card{
+background:#fff;
+color:#333;
+padding:20px;
+border-radius:15px;
+}
+
+input,select,textarea{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:10px;
+border:1px solid #ddd;
+}
+
+button{
+width:100%;
+padding:14px;
+margin-top:20px;
+border:none;
+border-radius:10px;
+background:#007bff;
+color:#fff;
+}
+
+/* Upload */
+.upload-box{
+display:block;
+padding:16px;
+border-radius:12px;
+border:2px dashed #ccc;
+background:#f7f9fc;
+text-align:center;
+font-weight:600;
+cursor:pointer;
+margin-top:10px;
+}
+.upload-box input{display:none;}
+
+/* Signature */
+canvas{
+width:100%;
+height:150px;
+background:#fff;
+border-radius:8px;
+margin-top:10px;
+touch-action:none;
+}
+
+.clear-btn{
+background:#ccc;
+color:#333;
+margin-top:10px;
+}
+
+/* Loading */
+#loading{
+display:none;
+text-align:center;
+padding:20px;
+color:#333;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<div class="card">
+
+<h2>📡 Converge Application</h2>
+
+<form id="form">
+
+<input id="name" placeholder="Full Name" required>
+<input id="phone" placeholder="Mobile Number" required>
+<textarea id="address" placeholder="Address" required></textarea>
+
+<select id="category" onchange="loadPlans()" required>
+<option value="">Select Category</option>
+<option value="super">🎮 Super Plans (TV Bundle)</option>
+<option value="netflix">🍿 Netflix Bundle</option>
+<option value="fiber">📶 FiberX (Internet Only)</option>
+<option value="tod">🌙 Time of Day</option>
+<option value="flexibiz">🏢 FlexiBiz</option>
+<option value="microbiz">🏪 MicroBiz</option>
+</select>
+
+<select id="plan" required></select>
+<small style="color:gray;">
+* Speeds are up to maximum. Actual speeds may vary depending on location.
+</small>
+
+<!-- Upload -->
+<label class="upload-box" id="uploadBox">
+📤 Upload Valid ID
+<input type="file" id="idfile" accept="image/*" required>
+</label>
+<p id="fileName" style="font-size:12px;color:gray;"></p>
+
+<h4>Signature</h4>
+<canvas id="sig"></canvas>
+<button type="button" class="clear-btn" onclick="clearSignature()">Clear Signature</button>
+
+<button type="submit">Submit Application</button>
+
+</form>
+
+<div id="loading">Submitting...</div>
+
+</div>
+</div>
+
+<script>
+
+// FIREBASE
+firebase.initializeApp({
+apiKey:"AIzaSyBwrJprjuU4BywFapZyw_SsBcsJAYo5OPU",
+authDomain:"convergecrm-7c237.firebaseapp.com",
+projectId:"convergecrm-7c237",
+storageBucket:"convergecrm-7c237.appspot.com"
+});
+
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+// FILE DISPLAY
+const idfile = document.getElementById("idfile");
+const uploadBox = document.getElementById("uploadBox");
+const fileName = document.getElementById("fileName");
+
+idfile.addEventListener("change", function(){
+if(this.files.length){
+fileName.innerText="Selected: "+this.files[0].name;
+uploadBox.style.borderColor="#28a745";
+}
+});
+
+// PLANS
+const plans = {
+
+// 🎮 SUPER PLANS (Bundles with TV)
+super: {
+"PLAY PLAN": "₱1,349 | up to 200 Mbps | Sky TV 99 (52 channels) | Xperience Box | WiFi 6 Modem",
+"MAX PLAN": "₱1,599 | up to 400 Mbps | Sky TV 99 | Xperience Box | WiFi 6 Modem",
+"ULTRA PLAN": "₱2,599 | up to 800 Mbps | Sky TV 99 | Xperience Box | WiFi 6 Modem"
+},
+
+// 🍿 NETFLIX BUNDLES
+netflix: {
+"PLAN 1558": "₱1,558 | 200 Mbps | FREE Netflix | WiFi 6 | SKY channels",
+"PLAN 1798": "₱1,798 | 325 Mbps | FREE Netflix | WiFi 6 | SKY channels",
+"PLAN 1998": "₱1,998 | 350 Mbps | FREE Netflix | WiFi 6 | SKY channels",
+"PLAN 2298": "₱2,298 | 500 Mbps | FREE Netflix | WiFi 6 | SKY channels"
+},
+
+// 📶 FIBER X (Internet Only)
+fiber: {
+"FiberX 1500": "₱1,500 | up to 300 Mbps | Unlimited | WiFi modem included",
+"FiberX 2000": "₱2,000 | up to 500 Mbps | Unlimited | WiFi modem included",
+"FiberX 2500": "₱2,500 | up to 700 Mbps | Unlimited | WiFi modem included",
+"FiberX 3500": "₱3,500 | up to 1 Gbps | XCLSV plan | Premium speed"
+},
+
+// 🌙 TIME OF DAY (TOD)
+tod: {
+"TOD 1699": "₱1,699 | up to 500 Mbps (peak) / 300 Mbps (off-peak)",
+"TOD 3000": "₱3,000 | up to 1000 Mbps (peak) / 700 Mbps (off-peak)"
+},
+
+// 🏢 FLEXIBIZ (from your photo)
+flexibiz: {
+"FlexiBiz 2000": "₱2,000 | up to 100 Mbps (peak) / 50 Mbps (off-peak)",
+"FlexiBiz 4000": "₱4,000 | up to 200 Mbps / 100 Mbps",
+"FlexiBiz 8000": "₱8,000 | up to 400 Mbps / 200 Mbps",
+"FlexiBiz 12000": "₱12,000 | up to 600 Mbps / 300 Mbps",
+"FlexiBiz 15000": "₱15,000 | up to 800 Mbps / 400 Mbps",
+"FlexiBiz 18000": "₱18,000 | up to 1000 Mbps / 500 Mbps"
+},
+
+// 🏪 MICROBIZ MAX (from your photo)
+microbiz: {
+"MicroBiz Max 75": "₱1,449 | up to 75 Mbps",
+"MicroBiz Max 100": "₱1,599 | up to 100 Mbps",
+"MicroBiz Max 150": "₱1,799 | up to 150 Mbps",
+"MicroBiz Max 250": "₱2,099 | up to 250 Mbps",
+"MicroBiz Max 400": "₱2,499 | up to 400 Mbps"
+}
+
+};
+
+function loadPlans(){
+plan.innerHTML="";
+for(let p in plans[category.value]){
+let o=document.createElement("option");
+o.value=p;
+o.text=p;
+plan.appendChild(o);
+}
+}
+
+// 🔥 PERFECT SIGNATURE FIX
+const canvas = document.getElementById("sig");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas(){
+const rect = canvas.getBoundingClientRect();
+const ratio = window.devicePixelRatio || 1;
+
+canvas.width = rect.width * ratio;
+canvas.height = rect.height * ratio;
+
+ctx.setTransform(1,0,0,1,0,0);
+ctx.scale(ratio, ratio);
+}
+
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+ctx.lineWidth = 2;
+ctx.lineCap = "round";
+
+let drawing = false;
+
+function getPos(e){
+const rect = canvas.getBoundingClientRect();
+return {
+x:(e.touches?e.touches[0].clientX:e.clientX)-rect.left,
+y:(e.touches?e.touches[0].clientY:e.clientY)-rect.top
+};
+}
+
+function start(e){
+e.preventDefault();
+drawing=true;
+const p=getPos(e);
+ctx.beginPath();
+ctx.moveTo(p.x,p.y);
+}
+
+function draw(e){
+if(!drawing) return;
+e.preventDefault();
+
+const p=getPos(e);
+
+ctx.lineTo(p.x,p.y);
+ctx.stroke();
+
+ctx.beginPath();
+ctx.moveTo(p.x,p.y);
+}
+
+function stop(){
+drawing=false;
+ctx.beginPath();
+}
+
+canvas.addEventListener("mousedown",start);
+canvas.addEventListener("mousemove",draw);
+canvas.addEventListener("mouseup",stop);
+canvas.addEventListener("mouseleave",stop);
+
+canvas.addEventListener("touchstart",start,{passive:false});
+canvas.addEventListener("touchmove",draw,{passive:false});
+canvas.addEventListener("touchend",stop);
+
+function clearSignature(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+function getSignatureImage(){
+    return canvas.toDataURL("image/png");
+}
+
+// SUBMIT
+const form = document.getElementById("form");
+const loading = document.getElementById("loading");
+
+form.addEventListener("submit",async(e)=>{
+e.preventDefault();
+
+if(!idfile.files.length){
+alert("Upload ID first!");
+return;
+}
+
+loading.style.display="block";
+
+// upload ID
+const file=idfile.files[0];
+const ref=storage.ref("ids/"+Date.now()+"_"+file.name);
+await ref.put(file);
+const idURL=await ref.getDownloadURL();
+
+// PDF
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+doc.text(document.getElementById("name").value,20,20);
+
+const pdfBlob=doc.output("blob");
+const pdfRef=storage.ref("pdfs/"+Date.now()+".pdf");
+
+await pdfRef.put(pdfBlob);
+const pdfURL=await pdfRef.getDownloadURL();
+
+// AFTER uploading ID
+// BEFORE saving to Firestore
+
+// SIGNATURE UPLOAD
+const sigData = getSignatureImage();
+
+const sigRef = storage.ref("signatures/" + Date.now() + ".png");
+await sigRef.putString(sigData, 'data_url');
+
+const sigURL = await sigRef.getDownloadURL();
+
+// SAVE FIRESTORE
+await db.collection("applications").add({
+    name: name.value,
+    phone: phone.value,
+    address: address.value,
+    plan: plan.value,
+    status: "Pending",
+    date: new Date(),
+
+    idURL: idURL,
+    pdfURL: pdfURL,
+    signatureURL: sigURL   // 🔥 NEW
+});
+
+loading.style.display="none";
+alert("Application submitted!");
+
+form.reset();
+fileName.innerText="";
+uploadBox.style.borderColor="#ccc";
+clearSignature();
+
+});
+
+</script>
+
+</body>
+</html>
