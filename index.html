@@ -219,31 +219,33 @@ preview.style.display = "block";
 
 // COMPRESS IMAGE
 async function compressImage(file){
-return new Promise(resolve=>{
-const reader = new FileReader();
+    return new Promise(resolve=>{
+        const reader = new FileReader();
 
-reader.onload = e=>{
-const img = new Image();
-img.src = e.target.result;
+        reader.onload = e=>{
+            const img = new Image();
+            img.src = e.target.result;
 
-img.onload = ()=>{
-const canvas = document.createElement("canvas");
-const ctx = canvas.getContext("2d");
+            img.onload = ()=>{
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
 
-const maxWidth = 800;
-const scale = maxWidth / img.width;
+                const maxWidth = 600;
+                const scale = maxWidth / img.width;
 
-canvas.width = maxWidth;
-canvas.height = img.height * scale;
+                canvas.width = maxWidth;
+                canvas.height = img.height * scale;
 
-ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-resolve(canvas.toDataURL("image/jpeg", 0.6));
-};
-};
+                canvas.toBlob(blob=>{
+                    resolve(blob); // 🔥 RETURN BLOB (NOT BASE64)
+                }, "image/jpeg", 0.6);
+            };
+        };
 
-reader.readAsDataURL(file);
-});
+        reader.readAsDataURL(file);
+    });
 }
 
 // SIGNATURE
@@ -354,7 +356,24 @@ const idURL = await ref.getDownloadURL();
 // SIGNATURE
 const sigData = getSignatureImage();
 const sigRef = storage.ref("signatures/"+Date.now()+".jpg");
-await sigRef.putString(sigData,'data_url');
+function dataURLtoBlob(dataurl) {
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+
+    return new Blob([u8arr], {type:mime});
+}
+
+// convert signature
+const sigBlob = dataURLtoBlob(sigData);
+
+await sigRef.put(sigBlob); // 🔥 faster
 const sigURL = await sigRef.getDownloadURL();
 
 // SAVE
