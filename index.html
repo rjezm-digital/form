@@ -318,9 +318,8 @@ clearSignature();
 }catch(err){
 console.error(err);
 loading.style.display="none";
-alert("Upload failed!");
+alert(err.message); // 🔥 SHOW REAL ERROR
 }
-
 });
 
 </script>
