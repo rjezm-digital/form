@@ -287,6 +287,13 @@ return;
 loading.style.display="block";
 
 try{
+    
+    if(canvas.toDataURL().length < 1000){
+alert("Please add signature!");
+loading.style.display="none";
+return;
+}
+    
 
 // 🔥 UPLOAD ID
 const file = idfile.files[0];
