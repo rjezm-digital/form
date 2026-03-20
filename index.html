@@ -455,10 +455,10 @@ return;
 
 // 🔥 SAVE TO FIRESTORE
 await db.collection("applications").add({
-name: name.value || "",
-phone: phone.value || "",
-address: address.value || "",
-plan: plan.value || "No Plan Selected",
+name: document.getElementById("name").value.trim() || "No Name",
+phone: document.getElementById("phone").value.trim(),
+address: document.getElementById("address").value.trim(),
+plan: document.getElementById("plan").value || "No Plan",
 status: "Pending",
 date: new Date(),
 idURL: idURL || "",
