@@ -102,9 +102,6 @@ projectId:"convergecrm-7c237"
 
 const db = firebase.firestore();
 
-const CLOUD_NAME = "diww9txws";
-const UPLOAD_PRESET = "unsigned_preset";
-
 const loading = document.getElementById("loading");
 const form = document.getElementById("form");
 
@@ -161,11 +158,14 @@ microbiz: {
 }
 
 function loadPlans(){
-plan.innerHTML="";
+plan.innerHTML = '<option value="">Select Plan</option>';
+
+if(!plans[category.value]) return;
+
 for(let p in plans[category.value]){
-let o=document.createElement("option");
-o.value=p;
-o.text=p;
+let o = document.createElement("option");
+o.value = p;
+o.text = p + " - " + plans[category.value][p];
 plan.appendChild(o);
 }
 }
@@ -306,16 +306,22 @@ const idURL = await uploadToCloudinary(file);
 const sigFile = await getSignatureFile();
 const sigURL = await uploadToCloudinary(sigFile);
 
+if(!plan.value){
+alert("Please select a plan!");
+loading.style.display="none";
+return;
+}
+
 // 🔥 SAVE TO FIRESTORE
 await db.collection("applications").add({
-name:name.value,
-phone:phone.value,
-address:address.value,
-plan:plan.value,
-status:"Pending",
-date:new Date(),
-idURL,
-sigURL
+name: name.value || "",
+phone: phone.value || "",
+address: address.value || "",
+plan: plan.value || "No Plan Selected",
+status: "Pending",
+date: new Date(),
+idURL: idURL || "",
+sigURL: sigURL || ""
 });
 
 loading.style.display="none";
