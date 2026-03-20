@@ -14,20 +14,21 @@
 body{
 font-family:Poppins;
 margin:0;
-background:#0b2a4a;
+background:linear-gradient(135deg,#0d2b45,#1b4f72);
 }
 
 .container{
-max-width:500px;
+max-width:600px;
 margin:auto;
 padding:20px;
 }
 
 .card{
-background:#fff;
-padding:20px;
-border-radius:16px;
-box-shadow:0 10px 25px rgba(0,0,0,0.15);
+background:white;
+color:#333;
+padding:25px;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
 }
 
 h2{
@@ -35,18 +36,22 @@ color:#0b2a4a;
 margin-bottom:15px;
 }
 
-input,select,textarea{
+input, select, textarea{
 width:100%;
 padding:14px;
-margin-top:10px;
-border-radius:10px;
-border:1px solid #ddd;
+margin-top:12px;
+border-radius:12px;
+border:1px solid #e0e6ed;
+background:#f9fbfd;
 font-size:14px;
+outline:none;
+transition:0.2s;
 }
 
 input:focus, select:focus, textarea:focus{
-border-color:#007bff;
-outline:none;
+border-color:#00aaff;
+background:#fff;
+box-shadow:0 0 0 2px rgba(0,170,255,0.1);
 }
 
 button{
@@ -54,11 +59,18 @@ width:100%;
 padding:14px;
 margin-top:20px;
 border:none;
-border-radius:10px;
-background:#007bff;
+border-radius:12px;
+background:linear-gradient(90deg,#007bff,#00c6ff);
 color:#fff;
 font-weight:600;
-font-size:16px;
+font-size:15px;
+cursor:pointer;
+transition:0.2s;
+}
+
+button:hover{
+transform:translateY(-1px);
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
 }
 
 .upload-box{
@@ -121,6 +133,10 @@ height:auto;
 border-radius:10px;
 display:block;
 margin-top:10px;
+}
+
+*{
+box-sizing: border-box;
 }
 
 .clear-btn{
