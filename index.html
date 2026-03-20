@@ -282,16 +282,16 @@ plan.innerHTML = '<option value="">Select Plan</option>';
 
 if(!plans[category.value]) return;
 
-if(!plan.value){
-alert("Please select a plan!");
-return;
-}
-
 for(let p in plans[category.value]){
 let o = document.createElement("option");
 o.value = p;
 o.text = p + " - " + plans[category.value][p];
 plan.appendChild(o);
+}
+
+// ✅ only auto-select if there is at least 1 plan
+if(plan.options.length > 1){
+plan.selectedIndex = 1;
 }
 }
 
