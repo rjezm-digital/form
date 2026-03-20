@@ -343,15 +343,36 @@ const compressed = await compressImage(idfile.files[0]);
 
 // UPLOAD WITH PROGRESS
 const ref = storage.ref("ids/"+Date.now()+".jpg");
+
+// 🔥 PROPER UPLOAD HANDLER
 const uploadTask = ref.put(compressed);
 
-uploadTask.on('state_changed', snapshot=>{
-const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-progressBar.style.width = progress + "%";
-});
+let idURL = "";
 
-await uploadTask;
-const idURL = await ref.getDownloadURL();
+await new Promise((resolve, reject)=>{
+
+    uploadTask.on('state_changed',
+    
+        (snapshot)=>{
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            progressBar.style.width = progress + "%";
+        },
+
+        (error)=>{
+            console.error("UPLOAD ERROR:", error);
+            alert("Upload failed!");
+            loading.style.display="none";
+            reject(error);
+        },
+
+        async ()=>{
+            idURL = await ref.getDownloadURL();
+            resolve();
+        }
+
+    );
+
+});
 
 // SIGNATURE
 const sigData = getSignatureImage();
