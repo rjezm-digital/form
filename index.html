@@ -132,7 +132,7 @@ firebase.initializeApp({
 apiKey:"AIzaSyBwrJprjuU4BywFapZyw_SsBcsJAYo5OPU",
 authDomain:"convergecrm-7c237.firebaseapp.com",
 projectId:"convergecrm-7c237",
-storageBucket:"convergecrm-7c237.appspot.com"
+storageBucket:"convergecrm-7c237.firebasestorage.app"
 });
 
 const db = firebase.firestore();
@@ -338,66 +338,41 @@ loading.style.display="block";
 
 try{
 
-// COMPRESS
+// ✅ ONLY ONCE
 const file = idfile.files[0];
+const ref = storage.ref("ids/" + Date.now() + ".jpg");
 
-// UPLOAD WITH PROGRESS
-const ref = storage.ref("ids/"+Date.now()+".jpg");
+// ✅ upload
+await ref.put(file);
+const idURL = await ref.getDownloadURL();
 
-// 🔥 PROPER UPLOAD HANDLER
-const uploadTask = ref.put(file);
-
-let idURL = "";
-
-await new Promise((resolve, reject)=>{
-
-    uploadTask.on('state_changed',
-    
-        (snapshot)=>{
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            progressBar.style.width = progress + "%";
-        },
-
-        (error)=>{
-            console.error("UPLOAD ERROR:", error);
-            alert("Upload failed!");
-            loading.style.display="none";
-            reject(error);
-        },
-
-        async ()=>{
-            idURL = await ref.getDownloadURL();
-            resolve();
-        }
-
-    );
-
-});
+// progress full
+progressBar.style.width = "100%";
 
 // SIGNATURE
 const sigData = getSignatureImage();
-const sigRef = storage.ref("signatures/"+Date.now()+".jpg");
-function dataURLtoBlob(dataurl) {
-    const arr = dataurl.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
+const sigRef = storage.ref("signatures/" + Date.now() + ".jpg");
 
-    while(n--){
-        u8arr[n] = bstr.charCodeAt(n);
-    }
+function dataURLtoBlob(dataurl){
+const arr = dataurl.split(',');
+const mime = arr[0].match(/:(.*?);/)[1];
+const bstr = atob(arr[1]);
+let n = bstr.length;
+const u8arr = new Uint8Array(n);
 
-    return new Blob([u8arr], {type:mime});
+while(n--){
+u8arr[n] = bstr.charCodeAt(n);
 }
 
-// convert signature
+return new Blob([u8arr], {type:mime});
+}
+
 const sigBlob = dataURLtoBlob(sigData);
 
-await sigRef.put(sigBlob); // 🔥 faster
+await sigRef.put(sigBlob);
 const sigURL = await sigRef.getDownloadURL();
 
-// SAVE
+// SAVE TO FIRESTORE
 await db.collection("applications").add({
 name:name.value,
 phone:phone.value,
