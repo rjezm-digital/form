@@ -106,6 +106,29 @@ const db = firebase.firestore();
 const CLOUD_NAME = "diww9txws";
 const UPLOAD_PRESET = "unsigned_preset";
 
+async function uploadToCloudinary(file){
+const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+
+const formData = new FormData();
+formData.append("file", file);
+formData.append("upload_preset", UPLOAD_PRESET);
+
+const res = await fetch(url, {
+method: "POST",
+body: formData
+});
+
+const data = await res.json();
+
+console.log("Cloudinary response:", data);
+
+if(!data.secure_url){
+throw new Error(data.error?.message || "Upload failed");
+}
+
+return data.secure_url;
+}
+
 const plans = {
 
 // 🎮 SUPER PLANS (Bundles with TV)
@@ -267,10 +290,11 @@ ctx.clearRect(0,0,canvas.width,canvas.height);
 }
 
 // SIGNATURE IMAGE
-function getSignatureBlob(){
+function getSignatureFile(){
 return new Promise(resolve=>{
 canvas.toBlob(blob=>{
-resolve(blob);
+const file = new File([blob], "signature.jpg", { type: "image/jpeg" });
+resolve(file);
 },"image/jpeg",0.7);
 });
 }
@@ -293,8 +317,8 @@ const file = idfile.files[0];
 const idURL = await uploadToCloudinary(file);
 
 // 🔥 UPLOAD SIGNATURE
-const sigBlob = await getSignatureBlob();
-const sigURL = await uploadToCloudinary(sigBlob);
+const sigFile = await getSignatureFile();
+const sigURL = await uploadToCloudinary(sigFile);
 
 // 🔥 SAVE TO FIRESTORE
 await db.collection("applications").add({
