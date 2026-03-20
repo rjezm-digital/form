@@ -182,6 +182,13 @@ body: formData
 });
 
 const data = await res.json();
+console.log("Cloudinary:", data);
+
+if(!data.secure_url){
+alert("Cloudinary Error: " + JSON.stringify(data));
+throw new Error("Upload failed");
+}
+
 return data.secure_url;
 }
 
