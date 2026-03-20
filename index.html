@@ -339,13 +339,13 @@ loading.style.display="block";
 try{
 
 // COMPRESS
-const compressed = await compressImage(idfile.files[0]);
+const file = idfile.files[0];
 
 // UPLOAD WITH PROGRESS
 const ref = storage.ref("ids/"+Date.now()+".jpg");
 
 // 🔥 PROPER UPLOAD HANDLER
-const uploadTask = ref.put(compressed);
+const uploadTask = ref.put(file);
 
 let idURL = "";
 
