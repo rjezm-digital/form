@@ -102,32 +102,8 @@ projectId:"convergecrm-7c237"
 
 const db = firebase.firestore();
 
-// 🔥 CLOUDINARY CONFIG
-const CLOUD_NAME = "diww9txws";
-const UPLOAD_PRESET = "unsigned_preset";
-
-async function uploadToCloudinary(file){
-const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
-
-const formData = new FormData();
-formData.append("file", file);
-formData.append("upload_preset", UPLOAD_PRESET);
-
-const res = await fetch(url, {
-method: "POST",
-body: formData
-});
-
-const data = await res.json();
-
-console.log("Cloudinary response:", data);
-
-if(!data.secure_url){
-throw new Error(data.error?.message || "Upload failed");
-}
-
-return data.secure_url;
-}
+const loading = document.getElementById("loading");
+const form = document.getElementById("form");
 
 const plans = {
 
