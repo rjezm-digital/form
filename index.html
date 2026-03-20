@@ -74,6 +74,31 @@ margin-top:10px;
 color:#007bff;
 }
 
+.upload-box{
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+padding:20px;
+border-radius:12px;
+border:2px dashed #007bff;
+background:#f4f8ff;
+cursor:pointer;
+margin-top:10px;
+color:#007bff;
+text-align:center;
+}
+
+.upload-box input{
+display:none;
+}
+
+#fileName{
+margin-top:8px;
+font-size:13px;
+color:#555;
+}
+
 canvas{
 width:100%;
 height:150px;
@@ -127,6 +152,7 @@ font-weight:600;
 <label class="upload-box">
 📤 Upload Valid ID
 <input type="file" id="idfile" accept="image/*" required>
+<span id="fileName">No file chosen</span>
 </label>
 
 <img id="preview">
@@ -259,6 +285,20 @@ const file = this.files[0];
 if(file){
 preview.src = URL.createObjectURL(file);
 preview.style.display = "block";
+}
+});
+
+const fileName = document.getElementById("fileName");
+
+idfile.addEventListener("change", function(){
+const file = this.files[0];
+
+if(file){
+fileName.innerText = file.name; // ✅ show file name
+preview.src = URL.createObjectURL(file);
+preview.style.display = "block";
+}else{
+fileName.innerText = "No file chosen";
 }
 });
 
