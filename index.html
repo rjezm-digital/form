@@ -168,7 +168,7 @@ font-weight:600;
 
 <form id="form">
 
-<input id="name" placeholder="Full Name" required>
+<input id="fullName" placeholder="Full Name" required>
 <input id="phone" placeholder="Mobile Number" required>
 <textarea id="address" placeholder="Address" required></textarea>
 
@@ -456,16 +456,21 @@ const sigURL = await uploadToCloudinary(sigFile);
 
 loading.innerText = "Almost done...";
 
+const nameInput = document.getElementById("fullName");
+const phoneInput = document.getElementById("phone");
+const addressInput = document.getElementById("address");
+const planInput = document.getElementById("plan");
+
 // 🔥 SAVE
 await db.collection("applications").add({
-name:name.value || "",
-phone:phone.value || "",
-address:address.value || "",
-plan:plan.value || "",
-status:"Pending",
-date:new Date(),
-idURL,
-sigURL
+    name: nameInput.value.trim(),
+    phone: phoneInput.value.trim(),
+    address: addressInput.value.trim(),
+    plan: planInput.value,
+    status: "Pending",
+    date: new Date(),
+    idURL,
+    sigURL
 });
 
 loading.style.display="none";
